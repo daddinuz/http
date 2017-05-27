@@ -13,15 +13,25 @@
 extern "C" {
 #endif
 
-typedef enum HttpMethod {
-    HTTP_METHOD_DELETE,
-    HTTP_METHOD_GET,
-    HTTP_METHOD_HEAD,
-    HTTP_METHOD_OPTIONS,
-    HTTP_METHOD_PATCH,
-    HTTP_METHOD_POST,
-    HTTP_METHOD_PUT
-} HttpMethod;
+typedef struct __HttpMethod {
+    const char *GET;
+    const char *PUT;
+    const char *HEAD;
+    const char *POST;
+    const char *PATCH;
+    const char *DELETE;
+    const char *OPTIONS;
+} __HttpMethod;
+
+static const __HttpMethod HttpMethod = {
+        .GET="GET",
+        .PUT="PUT",
+        .HEAD="HEAD",
+        .POST="POST",
+        .PATCH="PATCH",
+        .DELETE="DELETE",
+        .OPTIONS="OPTIONS"
+};
 
 #ifdef __cplusplus
 }

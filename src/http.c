@@ -2,299 +2,155 @@
  * C Source File
  *
  * Author: Davide Di Carlo
- * Date:   February 11, 2017
+ * Date:   May 26, 2017 
  * email:  daddinuz@gmal.com
  */
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include <curl/curl.h>
-#include "picohttpparser.h"
 #include "strdup.h"
 #include "http.h"
-#include "__x_http_header__"
 
+#define _STR(x)         #x
+#define STR(x)          _STR(x)
+#define TRACE(x)        "\nAt: " __FILE__ ":" STR(__LINE__) "\n" x
 
-/************************************
- * Macro definitions
+#define BUFFER_SIZE     512
+
+/*
+ *
  */
-#define _STR(s)         #s
-#define STR(s)          _STR(s)
-#define TRACE(msg)      "At: " __FILE__ ":" STR(__LINE__) "\r\n" msg
+static size_t __write_headers_callback(void *data, size_t size, size_t nmemb, HttpResponse *response);
+static size_t __write_body_callback(void *data, size_t size, size_t nmemb, HttpResponse *response);
 
-#define SX_BUFFER_SIZE  512
-#define MD_BUFFER_SIZE  SX_BUFFER_SIZE * 2
-#define LG_BUFFER_SIZE  MD_BUFFER_SIZE * 2
-
-/************************************
- * Private functions declarations
+/*
+ *
  */
-static void __request_initialize(CURL **handler, struct curl_slist **list, const char **url, HttpHeader *header);
-static void __request_execute(CURL **handler, HttpResponse *response);
-static void __request_terminate(CURL **handler, struct curl_slist **list);
-static struct curl_slist *__make_header(HttpHeader *header);
-static void __parse_header(HttpResponse *response);
-static size_t __header_callback(void *data, size_t size, size_t nmemb, HttpResponse *response);
-static size_t __response_callback(void *data, size_t size, size_t nmemb, HttpResponse *response);
-static void __from_underscore_to_hyphen(char *dst, size_t max, const char *src);
+HttpResponse http_perform(HttpRequest request, bool allow_redirects, long timeout) {
+    char buffer[BUFFER_SIZE] = {0};
+    CURL *handler = curl_easy_init();
+    struct curl_slist *headers_list = NULL;
+    HttpResponse response = http_response_create(0, NULL, NULL, 0, NULL, 0);
 
-/************************************
- * Public functions definitions
- */
-HttpResponse http_delete(const char *url, const char *data, HttpHeader header) {
-    CURL *handler = NULL;
-    struct curl_slist *list = NULL;
-    HttpResponse response = {.body_length=0, .raw_body=NULL, .header_length=0, .raw_header=NULL};
-
-    __request_initialize(&handler, &list, &url, &header);
-    curl_easy_setopt(handler, CURLOPT_CUSTOMREQUEST, "DELETE");
-    curl_easy_setopt(handler, CURLOPT_POSTFIELDS, data);
-    curl_easy_setopt(handler, CURLOPT_POSTFIELDSIZE, strlen(data));
-    __request_execute(&handler, &response);
-    __request_terminate(&handler, &list);
-
-    return response;
-}
-
-HttpResponse http_get(const char *url, HttpHeader header) {
-    CURL *handler = NULL;
-    struct curl_slist *list = NULL;
-    HttpResponse response = {.body_length=0, .raw_body=NULL, .header_length=0, .raw_header=NULL};
-
-    __request_initialize(&handler, &list, &url, &header);
-    curl_easy_setopt(handler, CURLOPT_HTTPGET, 1);
-    __request_execute(&handler, &response);
-    __request_terminate(&handler, &list);
-
-    return response;
-}
-
-HttpResponse http_head(const char *url, HttpHeader header) {
-    CURL *handler = NULL;
-    struct curl_slist *list = NULL;
-    HttpResponse response = {.body_length=0, .raw_body=NULL, .header_length=0, .raw_header=NULL};
-
-    __request_initialize(&handler, &list, &url, &header);
-    curl_easy_setopt(handler, CURLOPT_NOBODY, 1);
-    __request_execute(&handler, &response);
-    __request_terminate(&handler, &list);
-
-    return response;
-}
-
-HttpResponse http_options(const char *url, const char *data, HttpHeader header) {
-    CURL *handler = NULL;
-    struct curl_slist *list = NULL;
-    HttpResponse response = {.body_length=0, .raw_body=NULL, .header_length=0, .raw_header=NULL};
-
-    __request_initialize(&handler, &list, &url, &header);
-    curl_easy_setopt(handler, CURLOPT_CUSTOMREQUEST, "OPTIONS");
-    curl_easy_setopt(handler, CURLOPT_POSTFIELDS, data);
-    curl_easy_setopt(handler, CURLOPT_POSTFIELDSIZE, strlen(data));
-    __request_execute(&handler, &response);
-    __request_terminate(&handler, &list);
-
-    return response;
-}
-
-HttpResponse http_patch(const char *url, const char *data, HttpHeader header) {
-    CURL *handler = NULL;
-    struct curl_slist *list = NULL;
-    HttpResponse response = {.body_length=0, .raw_body=NULL, .header_length=0, .raw_header=NULL};
-
-    __request_initialize(&handler, &list, &url, &header);
-    curl_easy_setopt(handler, CURLOPT_CUSTOMREQUEST, "PATCH");
-    curl_easy_setopt(handler, CURLOPT_POSTFIELDS, data);
-    curl_easy_setopt(handler, CURLOPT_POSTFIELDSIZE, strlen(data));
-    __request_execute(&handler, &response);
-    __request_terminate(&handler, &list);
-
-    return response;
-}
-
-HttpResponse http_post(const char *url, const char *data, HttpHeader header) {
-    CURL *handler = NULL;
-    struct curl_slist *list = NULL;
-    HttpResponse response = {.body_length=0, .raw_body=NULL, .header_length=0, .raw_header=NULL};
-
-    __request_initialize(&handler, &list, &url, &header);
-    curl_easy_setopt(handler, CURLOPT_HTTPPOST, 1);
-    curl_easy_setopt(handler, CURLOPT_POSTFIELDS, data);
-    curl_easy_setopt(handler, CURLOPT_POSTFIELDSIZE, strlen(data));
-    __request_execute(&handler, &response);
-    __request_terminate(&handler, &list);
-
-    return response;
-}
-
-HttpResponse http_put(const char *url, const char *data, HttpHeader header) {
-    CURL *handler = NULL;
-    struct curl_slist *list = NULL;
-    HttpResponse response = {.body_length=0, .raw_body=NULL, .header_length=0, .raw_header=NULL};
-
-    __request_initialize(&handler, &list, &url, &header);
-    curl_easy_setopt(handler, CURLOPT_CUSTOMREQUEST, "PUT");
-    curl_easy_setopt(handler, CURLOPT_POSTFIELDS, data);
-    curl_easy_setopt(handler, CURLOPT_POSTFIELDSIZE, strlen(data));
-    __request_execute(&handler, &response);
-    __request_terminate(&handler, &list);
-
-    return response;
-}
-
-void http_response_delete(HttpResponse *response) {
-    assert(NULL != response);
-#define __X__(__key__)  \
-    free((*response).header.__key__);
-    __X_HTTP_HEADER__
-#undef __X__
-    free((*response).raw_header);
-    free((*response).raw_body);
-}
-
-/************************************
- * Private functions definitions
- */
-void __request_initialize(CURL **handler, struct curl_slist **list, const char **url, HttpHeader *header) {
-    assert(NULL != handler);
-    assert(NULL == *handler);
-    assert(NULL != list);
-    assert(NULL == *list);
-    assert(NULL != url);
-    assert(NULL != header);
-    /* Setup curl handler */
-    *handler = curl_easy_init();
-    if (NULL == *handler) {
+    if (NULL == handler) {
         perror(TRACE("Error"));
         abort();
     }
-    /* Create the headers list */
-    *list = __make_header(header);
+
+    /* setup headers */
+    if (request.headers) {
+        HttpDictEntry header_entry = request.headers[0];
+        for (size_t i = 0; header_entry.key && header_entry.value; i++, header_entry = request.headers[i]) {
+            snprintf(buffer, BUFFER_SIZE, "%s: %s", header_entry.key, header_entry.value);
+            headers_list = curl_slist_append(headers_list, buffer);
+        }
+    }
+
+    /* Set request options */
+    curl_easy_setopt(handler, CURLOPT_URL, request.url);
+    curl_easy_setopt(handler, CURLOPT_FOLLOWLOCATION, allow_redirects);
+    curl_easy_setopt(handler, CURLOPT_CUSTOMREQUEST, request.method);
+    curl_easy_setopt(handler, CURLOPT_HTTPHEADER, headers_list);
+    curl_easy_setopt(handler, CURLOPT_HEADERFUNCTION, __write_headers_callback);
+    curl_easy_setopt(handler, CURLOPT_HEADERDATA, &response);
+    curl_easy_setopt(handler, CURLOPT_WRITEFUNCTION, __write_body_callback);
+    curl_easy_setopt(handler, CURLOPT_WRITEDATA, &response);
+    if (timeout > 0) {
+        curl_easy_setopt(handler, CURLOPT_TIMEOUT, timeout);
+    }
+
 #ifndef NDEBUG
     /* Get verbose debug output */
-    curl_easy_setopt(*handler, CURLOPT_VERBOSE, 1L);
+    curl_easy_setopt(handler, CURLOPT_VERBOSE, 1L);
 #endif
-    /* Set request options */
-    curl_easy_setopt(*handler, CURLOPT_URL, *url);
-    curl_easy_setopt(*handler, CURLOPT_FOLLOWLOCATION, 1);
-    curl_easy_setopt(*handler, CURLOPT_HTTPHEADER, *list);
-    curl_easy_setopt(*handler, CURLOPT_HEADERFUNCTION, __header_callback);
-    curl_easy_setopt(*handler, CURLOPT_WRITEFUNCTION, __response_callback);
-}
 
-void __request_execute(CURL **handler, HttpResponse *response) {
-    assert(NULL != handler);
-    assert(NULL != *handler);
-    assert(NULL != response);
-    /* Tell CURLOPT_HEADERFUNCTION where to write */
-    curl_easy_setopt(*handler, CURLOPT_HEADERDATA, response);
-    /* Tell CURLOPT_WRITEFUNCTION where to write */
-    curl_easy_setopt(*handler, CURLOPT_WRITEDATA, response);
-    /* Finally perform the request */
-    CURLcode err = curl_easy_perform(*handler);
+    /* Perform the request */
+    CURLcode err = curl_easy_perform(handler);
     if (CURLE_OK != err) {
         fprintf(stderr, TRACE("Error: %s\n"), curl_easy_strerror(err));
         abort();
     }
-    /* Get the response HTTP status code */
-    curl_easy_getinfo(*handler, CURLINFO_RESPONSE_CODE, &(*response).status);
-    __parse_header(response);
-}
 
-void __request_terminate(CURL **handler, struct curl_slist **list) {
-    assert(NULL != handler);
-    assert(NULL != *handler);
-    assert(NULL != list);
-    assert(NULL != *list);
-    curl_easy_cleanup(*handler);
-    curl_slist_free_all(*list);
-}
-
-struct curl_slist *__make_header(HttpHeader *header) {
-    assert(NULL != header);
-    char key[SX_BUFFER_SIZE], buffer[LG_BUFFER_SIZE];
-    struct curl_slist *header_list = NULL;
-    /* X Macro trick to translate HttpHeader to corresponding string */
-#define __X__(__key__)                                                          \
-    if (NULL != (*header).__key__) {                                            \
-        __from_underscore_to_hyphen(key, SX_BUFFER_SIZE, STR(__key__));         \
-        snprintf(buffer, LG_BUFFER_SIZE, "%s: %s", key, (*header).__key__);     \
-        header_list = curl_slist_append(header_list, buffer);                   \
+    /* Get the response info */
+    char *url;
+    if (allow_redirects) {
+        curl_easy_getinfo(handler, CURLINFO_EFFECTIVE_URL, &url);
+    } else {
+        url = request.url;
     }
-    __X_HTTP_HEADER__
-#undef __X__
-    return header_list;
+    response.url = strdup(url);
+    curl_easy_getinfo(handler, CURLINFO_RESPONSE_CODE, &response.status_code);
+
+    /* Terminate */
+    curl_easy_cleanup(handler);
+    curl_slist_free_all(headers_list);
+
+    return response;
 }
 
-void __parse_header(HttpResponse *response) {
-    assert(NULL != response);
-    struct phr_header headers[64];
-    size_t headers_length = sizeof(headers) / sizeof(headers[0]);
-    char buffer[LG_BUFFER_SIZE], xbuffer[LG_BUFFER_SIZE];
-    const char *start = strchr((*response).raw_header, '\n') + 1;
-    const int consumed = phr_parse_headers(start, (*response).header_length, headers, &headers_length, 0);
-    if (consumed < 0) {
-        return;
-    }
-    for (size_t i = 0; i < headers_length; i++) {
-        snprintf(buffer, LG_BUFFER_SIZE, "%.*s", (int) headers[i].name_len, headers[i].name);
-        /* X Macro trick to translate raw header string into corresponding HttpHeader */
-#define __X__(__key__)                                                                                              \
-        __from_underscore_to_hyphen(xbuffer, LG_BUFFER_SIZE, STR(__key__));                                         \
-        if (strcmp(buffer, xbuffer) == 0) {                                                                         \
-            if (NULL == (*response).header.__key__) {                                                               \
-                (*response).header.__key__ = strndup(headers[i].value, headers[i].value_len);                       \
-            } else {                                                                                                \
-                const size_t n = snprintf(xbuffer, LG_BUFFER_SIZE, "%s, %.*s",                                      \
-                                          (*response).header.__key__, (int) headers[i].value_len, headers[i].value  \
-                );                                                                                                  \
-                free((*response).header.__key__);                                                                   \
-                (*response).header.__key__ = strndup(xbuffer, n);                                                   \
-            }                                                                                                       \
-            continue;                                                                                               \
-        }
-        __X_HTTP_HEADER__
-#undef __X__
-    }
+HttpResponse __http_get(const char *url, HttpXParams x_params) {
+    HttpRequest request = http_request_create(HttpMethod.GET, url, x_params.headers, NULL);
+    return http_perform(request, x_params.allow_redirects, x_params.timeout);
 }
 
-size_t __header_callback(void *data, size_t size, size_t nmemb, HttpResponse *response) {
+HttpResponse __http_head(const char *url, HttpXParams x_params) {
+    HttpRequest request = http_request_create(HttpMethod.HEAD, url, x_params.headers, NULL);
+    return http_perform(request, x_params.allow_redirects, x_params.timeout);
+}
+
+HttpResponse __http_delete(const char *url, HttpXParams x_params) {
+    HttpRequest request = http_request_create(HttpMethod.DELETE, url, x_params.headers, NULL);
+    return http_perform(request, x_params.allow_redirects, x_params.timeout);
+}
+
+HttpResponse __http_options(const char *url, HttpXParams x_params) {
+    HttpRequest request = http_request_create(HttpMethod.OPTIONS, url, x_params.headers, NULL);
+    return http_perform(request, x_params.allow_redirects, x_params.timeout);
+}
+
+HttpResponse __http_put(const char *url, HttpXParams x_params) {
+    HttpRequest request = http_request_create(HttpMethod.PUT, url, x_params.headers, x_params.body);
+    return http_perform(request, x_params.allow_redirects, x_params.timeout);
+}
+
+HttpResponse __http_post(const char *url, HttpXParams x_params) {
+    HttpRequest request = http_request_create(HttpMethod.POST, url, x_params.headers, x_params.body);
+    return http_perform(request, x_params.allow_redirects, x_params.timeout);
+}
+
+HttpResponse __http_patch(const char *url, HttpXParams x_params) {
+    HttpRequest request = http_request_create(HttpMethod.PATCH, url, x_params.headers, x_params.body);
+    return http_perform(request, x_params.allow_redirects, x_params.timeout);
+}
+
+/*
+ *
+ */
+size_t __write_headers_callback(void *data, size_t size, size_t nmemb, HttpResponse *response) {
     const size_t actual_size = size * nmemb;
     /* realloc behaves like malloc if NULL is passed as arg */
-    response->raw_header = realloc(response->raw_header, response->header_length + actual_size + 1); /* +1 for '\0' */
-    if (NULL == response->raw_header) {
+    response->headers = realloc(response->headers, response->headers_length + actual_size + 1); /* +1 for '\0' */
+    if (NULL == response->headers) {
         perror(TRACE("Error"));
         abort();
     }
-    memcpy(&response->raw_header[response->header_length], data, actual_size);
-    response->header_length += actual_size;
-    response->raw_header[response->header_length] = '\0';
+    memcpy(&response->headers[response->headers_length], data, actual_size);
+    response->headers_length += actual_size;
+    response->headers[response->headers_length] = '\0';
     return actual_size;
 }
 
-size_t __response_callback(void *data, size_t size, size_t nmemb, HttpResponse *response) {
+size_t __write_body_callback(void *data, size_t size, size_t nmemb, HttpResponse *response) {
     const size_t actual_size = size * nmemb;
     /* realloc behaves like malloc if NULL is passed as arg */
-    response->raw_body = realloc(response->raw_body, response->body_length + actual_size + 1); /* +1 for '\0' */
-    if (NULL == response->raw_body) {
+    response->body = realloc(response->body, response->body_length + actual_size + 1); /* +1 for '\0' */
+    if (NULL == response->body) {
         perror(TRACE("Error"));
         abort();
     }
-    memcpy(&response->raw_body[response->body_length], data, actual_size);
+    memcpy(&response->body[response->body_length], data, actual_size);
     response->body_length += actual_size;
-    response->raw_body[response->body_length] = '\0';
+    response->body[response->body_length] = '\0';
     return actual_size;
-}
-
-void __from_underscore_to_hyphen(char *dst, size_t max, const char *src) {
-    assert(NULL != dst);
-    assert(NULL != src);
-    size_t i = 0;
-    while (i <= max && '\0' != src[i]) {
-        dst[i] = (char) ('_' == src[i] ? '-' : src[i]);
-        i += 1;
-    }
-    dst[i] = '\0';
 }

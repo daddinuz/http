@@ -9,19 +9,20 @@
 #include <stdio.h>
 #include "http.h"
 
-
+/*
+ *
+ */
 int main() {
-    const char *url = "https://api.github.com/repos/daddinuz/http/issues";
-    HttpHeader header = {
-            .Accept="application/vnd.github.v3+json",
-            .Content_Type="application/json",
-            .User_Agent="daddinuz/http"
-    };
-    HttpResponse response = http_get(url, header);
-
-    const char line[] = "---------------------------------------------------------------------------------------------";
-    printf("%s\n%s\n%s\n%s\n", line, response.raw_header, response.raw_body, line);
-
-    http_response_delete(&response);
+    char *url = "https://api.github.com/repos/daddinuz/http/issues";
+    HttpDict headers = http_dict_create(
+            http_dict_entry_create("Accept", "application/vnd.github.v3+json"),
+            http_dict_entry_create("Content-Type", "application/json"),
+            http_dict_entry_create("User-Agent", "daddinuz/http")
+    );
+    HttpResponse response = http_get(url, .headers=headers);
+    printf("url: %s\nstatus_code: %d\n\n%s\n%s\n",
+           response.url, response.status_code, response.headers, response.body
+    );
+    http_response_destroy(&response);
     return 0;
 }
