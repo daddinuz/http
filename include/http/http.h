@@ -17,7 +17,7 @@
 #ifndef __HTTP_H__
 #define __HTTP_H__
 
-#define HTTP_VERSION "0.2.1"
+#define HTTP_VERSION "0.2.2"
 
 #ifdef __cplusplus
 extern "C" {
