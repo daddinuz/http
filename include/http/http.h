@@ -8,6 +8,7 @@
 
 #include <stdbool.h>
 #include "http_dict.h"
+#include "http_string.h"
 #include "http_status.h"
 #include "http_method.h"
 #include "http_request.h"
@@ -16,43 +17,31 @@
 #ifndef __HTTP_H__
 #define __HTTP_H__
 
-#define HTTP_VERSION "0.2.0"
+#define HTTP_VERSION "0.2.1"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern HttpResponse http_perform(HttpRequest request, bool allow_redirects, long timeout);
-
-#define http_x_no_params  0
-
-typedef struct HttpXParams {
-    long timeout;
-    bool allow_redirects;
+typedef struct HttpParams {
+    int __sentinel__;
+    const HttpString url;
     HttpDictEntry *headers;
-    char *body;
-} HttpXParams;
+    const HttpString body;
+    bool allow_redirects;
+    long timeout;
+} HttpParams;
 
-extern HttpResponse __http_get(const char *url, HttpXParams x_params);
-#define http_get(url, ...)        __http_get(url, (HttpXParams) {__VA_ARGS__})
+#define http_request(method, ...)   __http_perform(__FILE__, __LINE__, method, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
+#define http_get(...)               __http_perform(__FILE__, __LINE__, HttpMethod.GET, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
+#define http_head(...)              __http_perform(__FILE__, __LINE__, HttpMethod.HEAD, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
+#define http_delete(...)            __http_perform(__FILE__, __LINE__, HttpMethod.DELETE, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
+#define http_options(...)           __http_perform(__FILE__, __LINE__, HttpMethod.OPTIONS, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
+#define http_put(...)               __http_perform(__FILE__, __LINE__, HttpMethod.PUT, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
+#define http_post(...)              __http_perform(__FILE__, __LINE__, HttpMethod.POST, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
+#define http_patch(...)             __http_perform(__FILE__, __LINE__, HttpMethod.PATCH, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
 
-extern HttpResponse __http_head(const char *url, HttpXParams x_params);
-#define http_head(url, ...)       __http_head(url, (HttpXParams) {__VA_ARGS__})
-
-extern HttpResponse __http_delete(const char *url, HttpXParams x_params);
-#define http_delete(url, ...)     __http_delete(url, (HttpXParams) {__VA_ARGS__})
-
-extern HttpResponse __http_options(const char *url, HttpXParams x_params);
-#define http_options(url, ...)    __http_options(url, (HttpXParams) {__VA_ARGS__})
-
-extern HttpResponse __http_put(const char *url, HttpXParams x_params);
-#define http_put(url, ...)        __http_put(url, (HttpXParams) {__VA_ARGS__})
-
-extern HttpResponse __http_post(const char *url, HttpXParams x_params);
-#define http_post(url, ...)       __http_post(url, (HttpXParams) {__VA_ARGS__})
-
-extern HttpResponse __http_patch(const char *url, HttpXParams x_params);
-#define http_patch(url, ...)      __http_patch(url, (HttpXParams) {__VA_ARGS__})
+extern HttpResponse *__http_perform(const char *file, int line, const HttpString method, HttpParams *params);
 
 #ifdef __cplusplus
 }

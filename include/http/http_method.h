@@ -6,6 +6,8 @@
  * email:  daddinuz@gmal.com
  */
 
+#include "http_string.h"
+
 #ifndef __HTTP_METHOD_H__
 #define __HTTP_METHOD_H__
 
@@ -14,13 +16,13 @@ extern "C" {
 #endif
 
 typedef struct __HttpMethod {
-    const char *GET;
-    const char *PUT;
-    const char *HEAD;
-    const char *POST;
-    const char *PATCH;
-    const char *DELETE;
-    const char *OPTIONS;
+    const HttpString GET;
+    const HttpString PUT;
+    const HttpString HEAD;
+    const HttpString POST;
+    const HttpString PATCH;
+    const HttpString DELETE;
+    const HttpString OPTIONS;
 } __HttpMethod;
 
 static const __HttpMethod HttpMethod = {

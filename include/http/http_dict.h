@@ -6,6 +6,8 @@
  * email:  daddinuz@gmal.com
  */
 
+#include "http_string.h"
+
 #ifndef __HTTP_DICT_H__
 #define __HTTP_DICT_H__
 
@@ -14,8 +16,8 @@ extern "C" {
 #endif
 
 typedef struct HttpDictEntry {
-    char *key;
-    char *value;
+    const HttpString key;
+    const HttpString value;
 } HttpDictEntry;
 
 typedef HttpDictEntry HttpDict[];

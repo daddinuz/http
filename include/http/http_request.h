@@ -7,6 +7,7 @@
  */
 
 #include "http_dict.h"
+#include "http_string.h"
 
 #ifndef __HTTP_REQUEST_H__
 #define __HTTP_REQUEST_H__
@@ -16,18 +17,20 @@ extern "C" {
 #endif
 
 typedef struct HttpRequest {
-    char *method;           /* HTTP method to use. */
-    char *url;              /* URL to send. */
-    HttpDictEntry *headers; /* Headers to be attached to the request. */
-    char *body;             /* Body to be attached to the request. */
+    const HttpString method;        /* HTTP method to use. */
+    const HttpString url;           /* URL to send. */
+    const HttpDictEntry *headers;   /* Headers to be attached to the request. */
+    const HttpString body;          /* Body to be attached to the request. */
 } HttpRequest;
 
-extern HttpRequest http_request_create(
-        const char *method,
-        const char *url,
-        HttpDict headers,
-        const char *body
+extern HttpRequest *http_request_new(
+        const HttpString method,
+        const HttpString url,
+        const HttpDictEntry *headers,
+        const HttpString body
 );
+
+extern void http_request_delete(HttpRequest **ref);
 
 #ifdef __cplusplus
 }

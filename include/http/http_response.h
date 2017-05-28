@@ -7,6 +7,7 @@
  */
 
 #include <stddef.h>
+#include "http_request.h"
 
 #ifndef __HTTP_RESPONSE_H__
 #define __HTTP_RESPONSE_H__
@@ -16,24 +17,26 @@ extern "C" {
 #endif
 
 typedef struct HttpResponse {
-    int status_code;        /* HTTP status response code. */
-    char *url;              /* URL where has been sent. */
-    char *headers;          /* Response headers. */
-    size_t headers_length;  /* Headers length */
-    char *body;             /* Response body. */
-    size_t body_length;     /* Body length */
+    const HttpRequest *request;   /* Related HTTP request */
+    const int status_code;        /* HTTP status response code. */
+    const HttpString url;         /* URL where has been sent. */
+    const HttpString raw_headers; /* Response raw headers. */
+    const HttpString raw_body;    /* Response raw_body. */
+    const size_t headers_length;  /* Headers length */
+    const size_t body_length;     /* Body length */
 } HttpResponse;
 
-extern HttpResponse http_response_create(
+extern HttpResponse *http_response_new(
+        const HttpRequest *request,
         int status_code,
-        const char *url,
-        const char *headers,
+        const HttpString url,
+        const HttpString raw_headers,
         size_t headers_length,
-        const char *body,
+        const HttpString raw_body,
         size_t body_length
 );
 
-extern void http_response_destroy(HttpResponse *response);
+extern void http_response_delete(HttpResponse **ref);
 
 #ifdef __cplusplus
 }

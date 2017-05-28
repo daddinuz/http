@@ -6,18 +6,30 @@
  * email:  daddinuz@gmal.com
  */
 
+#include <stdlib.h>
+#include <string.h>
 #include "http_request.h"
 
-HttpRequest http_request_create(
-        const char *method,
-        const char *url,
-        HttpDict headers,
-        const char *body
+HttpRequest *http_request_new(
+        const HttpString method,
+        const HttpString url,
+        const HttpDictEntry *headers,
+        const HttpString body
 ) {
-    return (HttpRequest) {
-            .method=(char *) method,
-            .url=(char *) url,
+    HttpRequest initializer = {
+            .method=method,
+            .url=url,
             .headers=headers,
-            .body=(char *) body
+            .body=body
     };
+    HttpRequest *request = malloc(sizeof(HttpRequest));
+    memcpy(request, &initializer, sizeof(HttpRequest));
+    return request;
+}
+
+void http_request_delete(HttpRequest **ref) {
+    if (ref && *ref) {
+        free(*ref);
+        *ref = NULL;
+    }
 }
