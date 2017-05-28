@@ -1,27 +1,21 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.1)
 project(http)
 
-set(CMAKE_C_FLAGS "-std=c99 -Werror -Wall -Wextra -Wpedantic -Wuninitialized -Wmaybe-uninitialized")
-include_directories(include/http)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror -pedantic")
+if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+    # using GCC
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wcast-align -Wbad-function-cast -Wconversion")
+endif ()
 
-#####
-# Dependencies
-###
 set(DEPENDENCY_PATH ${PROJECT_SOURCE_DIR}/deps)
-
-set(STRDUP_PATH ${DEPENDENCY_PATH}/strdup)
-include_directories(${STRDUP_PATH})
-add_library(strdup ${STRDUP_PATH}/strdup.h ${STRDUP_PATH}/strdup.c)
+set(ARCHIVE_PATH ${PROJECT_SOURCE_DIR})
+set(TEST_PATH ${PROJECT_SOURCE_DIR}/test)
 
 #####
 # Archive
 ###
-set(HEADER_PATH ${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME})
-set(SOURCE_PATH ${PROJECT_SOURCE_DIR}/src)
-file(GLOB HEADER_FILES ${HEADER_PATH}/*.h)
-file(GLOB SOURCE_FILES ${SOURCE_PATH}/*.c)
-add_library(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} PRIVATE curl strdup)
+include(${PROJECT_NAME}.cmake)
 
 #####
 # Examples

@@ -19,7 +19,7 @@ int main() {
             http_dict_entry_create("Content-Type", "application/json"),
             http_dict_entry_create("User-Agent", "daddinuz/http")
     );
-    HttpResponse response = http_get(url, .headers=headers);
+    HttpResponse response = http_get(url);
     printf("url: %s\nstatus_code: %d\n\n%s\n%s\n",
            response.url, response.status_code, response.headers, response.body
     );

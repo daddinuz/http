@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <curl/curl.h>
-#include "strdup.h"
 #include "http.h"
 
 #define _STR(x)         #x
