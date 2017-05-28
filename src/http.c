@@ -95,6 +95,10 @@ HttpResponse *__send_request(const char *file, int line, HttpRequest *request, b
     curl_easy_setopt(handler, CURLOPT_HEADERDATA, &headers_buffer);
     curl_easy_setopt(handler, CURLOPT_WRITEFUNCTION, __write_buffer_callback);
     curl_easy_setopt(handler, CURLOPT_WRITEDATA, &body_buffer);
+    if (request->body) {
+        curl_easy_setopt(handler, CURLOPT_POSTFIELDS, request->body);
+        curl_easy_setopt(handler, CURLOPT_POSTFIELDSIZE, strlen(request->body));
+    }
     if (timeout > 0) {
         curl_easy_setopt(handler, CURLOPT_TIMEOUT, timeout);
     }
