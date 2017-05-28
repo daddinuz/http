@@ -11,12 +11,9 @@
 #include "http_string.h"
 
 HttpString http_string_new(const char *str) {
-    return strdup(str);
+    return str ? strdup(str) : NULL;
 }
 
-void http_string_delete(HttpString **ref) {
-    if (ref && *ref) {
-        free(*ref);
-        *ref = NULL;
-    }
+void http_string_delete(HttpString self) {
+    free((void *) self);
 }

@@ -10,11 +10,11 @@
 #include <string.h>
 #include "http_request.h"
 
-HttpRequest *http_request_new(
-        const HttpString method,
-        const HttpString url,
+HttpRequest *http_request_bake(
+        HttpString method,
+        HttpString url,
         const HttpDictEntry *headers,
-        const HttpString body
+        HttpString body
 ) {
     HttpRequest initializer = {
             .method=method,
@@ -27,9 +27,25 @@ HttpRequest *http_request_new(
     return request;
 }
 
-void http_request_delete(HttpRequest **ref) {
-    if (ref && *ref) {
-        free(*ref);
-        *ref = NULL;
+HttpRequest *http_request_new(
+        const char *method,
+        const char *url,
+        const HttpDictEntry *headers,
+        const char *body
+) {
+    return http_request_bake(
+            http_string_new(method),
+            http_string_new(url),
+            headers,
+            http_string_new(body)
+    );
+}
+
+void http_request_delete(HttpRequest *self) {
+    if (self) {
+        http_string_delete(self->method);
+        http_string_delete(self->url);
+        http_string_delete(self->body);
     }
+    free(self);
 }

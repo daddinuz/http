@@ -20,7 +20,7 @@ typedef struct HttpBuffer {
 } HttpBuffer;
 
 static void __die(const char *file, int line, const char *message);
-static size_t __write_buffer_callback(void *contents, size_t size, size_t nmemb, void *userp);
+static size_t __write_buffer_callback(void *content, size_t member_size, size_t members_count, void *user_data);
 static HttpResponse *__send_request(const char *file, int line, HttpRequest *request, bool allow_redirects, long timeout);
 
 /*
@@ -42,26 +42,26 @@ void __die(const char *file, int line, const char *message) {
     abort();
 }
 
-static size_t __write_buffer_callback(void *contents, size_t size, size_t nmemb, void *userp) {
-    size_t realsize = size * nmemb;
-    HttpBuffer *buffer = userp;
+static size_t __write_buffer_callback(void *content, size_t member_size, size_t members_count, void *user_data) {
+    size_t real_size = member_size * members_count;
+    HttpBuffer *buffer = user_data;
 
-    buffer->memory = realloc(buffer->memory, buffer->size + realsize + 1);
-    if(buffer->memory == NULL) {
-        __die("", 0, strerror(errno));
+    buffer->memory = realloc(buffer->memory, buffer->size + real_size + 1);
+    if (buffer->memory == NULL) {
+        __die(__FILE__, __LINE__, strerror(errno));
         abort();
     }
 
-    memcpy(&(buffer->memory[buffer->size]), contents, realsize);
-    buffer->size += realsize;
+    memcpy(&(buffer->memory[buffer->size]), content, real_size);
+    buffer->size += real_size;
     buffer->memory[buffer->size] = 0;
 
-    return realsize;
+    return real_size;
 }
 
 HttpResponse *__send_request(const char *file, int line, HttpRequest *request, bool allow_redirects, long timeout) {
-    int final_status_code = 0;
-    const char *final_url = {0};
+    int status_code = 0;
+    HttpString final_url = NULL;
     char buffer[BUFFER_SIZE] = {0};
     CURL *handler = curl_easy_init();
     struct curl_slist *headers_list = NULL;
@@ -72,18 +72,24 @@ HttpResponse *__send_request(const char *file, int line, HttpRequest *request, b
     }
 
     /* setup raw_headers */
-    if ((*request).headers) {
-        HttpString header_key = (*request).headers[0].key, header_value = (*request).headers[0].value;
-        for (size_t i = 0; header_key && header_value; i++, header_key = (*request).headers[i].key, header_value = (*request).headers[i].value) {
+    if (request->headers) {
+        size_t i = 0;
+        HttpString header_key, header_value;
+        while (true) {
+            header_key = request->headers[i].key, header_value = request->headers[i].value;
+            if (!(header_key && header_value)) {
+                break;
+            }
             snprintf(buffer, BUFFER_SIZE, "%s: %s", header_key, header_value);
             headers_list = curl_slist_append(headers_list, buffer);
+            i += 1;
         }
     }
 
     /* Set request options */
-    curl_easy_setopt(handler, CURLOPT_URL, (*request).url);
+    curl_easy_setopt(handler, CURLOPT_URL, request->url);
     curl_easy_setopt(handler, CURLOPT_FOLLOWLOCATION, allow_redirects);
-    curl_easy_setopt(handler, CURLOPT_CUSTOMREQUEST, (*request).method);
+    curl_easy_setopt(handler, CURLOPT_CUSTOMREQUEST, request->method);
     curl_easy_setopt(handler, CURLOPT_HTTPHEADER, headers_list);
     curl_easy_setopt(handler, CURLOPT_HEADERFUNCTION, __write_buffer_callback);
     curl_easy_setopt(handler, CURLOPT_HEADERDATA, &headers_buffer);
@@ -105,21 +111,22 @@ HttpResponse *__send_request(const char *file, int line, HttpRequest *request, b
     }
 
     /* Get the response info */
-
+    curl_easy_getinfo(handler, CURLINFO_RESPONSE_CODE, &status_code);
     if (allow_redirects) {
-        curl_easy_getinfo(handler, CURLINFO_EFFECTIVE_URL, &final_url);
+        char *tmp = NULL;
+        curl_easy_getinfo(handler, CURLINFO_EFFECTIVE_URL, &tmp);
+        final_url = http_string_new(tmp);
     } else {
-        final_url = (*request).url;
+        final_url = http_string_new(request->url);
     }
-    curl_easy_getinfo(handler, CURLINFO_RESPONSE_CODE, &final_status_code);
 
     /* Terminate */
     curl_easy_cleanup(handler);
     curl_slist_free_all(headers_list);
 
-    return http_response_new(
+    return http_response_bake(
             request,
-            final_status_code,
+            status_code,
             final_url,
             headers_buffer.memory,
             headers_buffer.size,

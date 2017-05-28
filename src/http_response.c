@@ -10,13 +10,13 @@
 #include <string.h>
 #include "http_response.h"
 
-HttpResponse *http_response_new(
-        const HttpRequest *request,
+HttpResponse *http_response_bake(
+        HttpRequest *request,
         int status_code,
-        const HttpString url,
-        const HttpString raw_headers,
+        HttpString url,
+        HttpString raw_headers,
         size_t headers_length,
-        const HttpString raw_body,
+        HttpString raw_body,
         size_t body_length
 ) {
     HttpResponse initializer = {
@@ -33,13 +33,29 @@ HttpResponse *http_response_new(
     return response;
 }
 
-void http_response_delete(HttpResponse **ref) {
-    if (ref && *ref) {
-        http_request_delete((HttpRequest **) &(**ref).request);
-        free((void *) (**ref).url);
-        free((void *) (**ref).raw_headers);
-        free((void *) (**ref).raw_body);
-        free(*ref);
-        *ref = NULL;
+HttpResponse *http_response_new(
+        HttpRequest *request,
+        int status_code,
+        const char *url,
+        const char *raw_headers,
+        const char *raw_body
+) {
+    return http_response_bake(
+            request,
+            status_code,
+            http_string_new(url),
+            http_string_new(raw_headers),
+            strlen(raw_headers),
+            http_string_new(raw_body),
+            strlen(raw_body)
+    );
+}
+
+void http_response_delete(HttpResponse *self) {
+    if (self) {
+        http_string_delete(self->url);
+        http_string_delete(self->raw_headers);
+        http_string_delete(self->raw_body);
     }
+    free(self);
 }

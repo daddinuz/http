@@ -23,14 +23,50 @@ typedef struct HttpRequest {
     const HttpString body;          /* Body to be attached to the request. */
 } HttpRequest;
 
-extern HttpRequest *http_request_new(
-        const HttpString method,
-        const HttpString url,
+/**
+ * Construct a new HttpRequest object.
+ * This function just puts together all the pieces needed to construct
+ * an HttpRequest object without performing any operation on them, so
+ * it expects `method`, `url`, `body` to be HttpString(s) allocated using `http_string_new`
+ *
+ * @param method    Http method
+ * @param url       URL to call
+ * @param headers   Http headers
+ * @param body      Http body
+ * @return `HttpRequest *` The newly created http request
+ */
+extern HttpRequest *http_request_bake(
+        HttpString method,
+        HttpString url,
         const HttpDictEntry *headers,
-        const HttpString body
+        HttpString body
 );
 
-extern void http_request_delete(HttpRequest **ref);
+/**
+ * Construct a new HttpRequest object.
+ * This function is a shortcut in order to properly construct an HttpRequest object.
+ * It will call `http_string_new` function on `method`, `url`, `body` parameters
+ * and then will call `http_request_bake` in order to construct the request.
+ *
+ * @param method    Http method
+ * @param url       URL to call
+ * @param headers   Http headers
+ * @param body      Http body
+ * @return `HttpRequest *` The newly created http request
+ */
+extern HttpRequest *http_request_new(
+        const char *method,
+        const char *url,
+        const HttpDictEntry *headers,
+        const char *body
+);
+
+/**
+ * Delete an HttpRequest object freeing its memory.
+ *
+ * @param self  The HttpRequest object to delete
+ */
+extern void http_request_delete(HttpRequest *self);
 
 #ifdef __cplusplus
 }

@@ -25,9 +25,9 @@ extern "C" {
 
 typedef struct HttpParams {
     int __sentinel__;
-    const HttpString url;
+    const char *url;
     HttpDictEntry *headers;
-    const HttpString body;
+    const char *body;
     bool allow_redirects;
     long timeout;
 } HttpParams;
@@ -41,10 +41,10 @@ typedef struct HttpParams {
 #define http_post(...)              __http_perform(__FILE__, __LINE__, HttpMethod.POST, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
 #define http_patch(...)             __http_perform(__FILE__, __LINE__, HttpMethod.PATCH, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
 
-extern HttpResponse *__http_perform(const char *file, int line, const HttpString method, HttpParams *params);
+extern HttpResponse *__http_perform(const char *file, int line, HttpString method, HttpParams *params);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif /* __HTTP_H__ */

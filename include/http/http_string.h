@@ -16,10 +16,10 @@ extern "C" {
 typedef const char *HttpString;
 
 extern HttpString http_string_new(const char *str);
-extern void http_string_delete(HttpString **ref);
+extern void http_string_delete(HttpString self);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __HTTP_HTTP_STRING_H__ */
+#endif /* __HTTP_STRING_H__ */
