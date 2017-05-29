@@ -28,7 +28,9 @@ typedef struct HttpParams {
     const char *url;
     HttpDictEntry *headers;
     const char *body;
-    bool allow_redirects;
+    bool no_follow_location;
+    bool no_peer_verification;
+    bool no_host_verification;
     long timeout;
 } HttpParams;
 

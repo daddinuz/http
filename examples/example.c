@@ -20,7 +20,7 @@ int main() {
             http_dict_entry_create("User-Agent", "daddinuz/http")
     );
 
-    HttpResponse *response = http_get(url, .headers=headers, .allow_redirects=true);
+    HttpResponse *response = http_get(url, .headers=headers);
     printf("url: %s\nstatus_code: %d\n\n%s\n%s\n",
            response->url, response->status_code, response->raw_headers, response->raw_body
     );

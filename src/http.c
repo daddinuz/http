@@ -12,37 +12,49 @@
 #include <curl/curl.h>
 #include "http.h"
 
-#define BUFFER_SIZE     512
-
+/*
+ * Internal declarations
+ */
 typedef struct HttpBuffer {
     size_t size;
     char *memory;
 } HttpBuffer;
 
 static void __die(const char *file, int line, const char *message);
-static size_t __write_buffer_callback(void *content, size_t member_size, size_t members_count, void *user_data);
-static HttpResponse *__send_request(const char *file, int line, HttpRequest *request, bool allow_redirects, long timeout);
+static size_t __callback(void *content, size_t member_size, size_t members_count, void *user_data);
+static HttpResponse *__perform(
+        const char *file,
+        int line,
+        HttpRequest *request,
+        bool no_follow_location,
+        bool no_peer_verification,
+        bool no_host_verification,
+        long timeout
+);
 
 /*
- *
+ * API definitions
  */
 HttpResponse *__http_perform(const char *file, int line, const HttpString method, HttpParams *params) {
-    if (!(*params).url) {
+    if (!params->url) {
         __die(file, line, "URL parameter is required");
     }
-    HttpRequest *request = http_request_new(method, (*params).url, (*params).headers, (*params).body);
-    return __send_request(file, line, request, (*params).allow_redirects, (*params).timeout);
+    HttpRequest *request = http_request_new(method, params->url, params->headers, params->body);
+    return __perform(
+            file, line, request,
+            params->no_follow_location, params->no_peer_verification, params->no_host_verification, params->timeout
+    );
 }
 
 /*
- *
+ * Internal definitions
  */
 void __die(const char *file, int line, const char *message) {
     fprintf(stderr, "\nAt: %s:%d\nError: %s\n", file, line, message);
     abort();
 }
 
-static size_t __write_buffer_callback(void *content, size_t member_size, size_t members_count, void *user_data) {
+static size_t __callback(void *content, size_t member_size, size_t members_count, void *user_data) {
     size_t real_size = member_size * members_count;
     HttpBuffer *buffer = user_data;
 
@@ -59,10 +71,17 @@ static size_t __write_buffer_callback(void *content, size_t member_size, size_t 
     return real_size;
 }
 
-HttpResponse *__send_request(const char *file, int line, HttpRequest *request, bool allow_redirects, long timeout) {
+HttpResponse *__perform(
+        const char *file,
+        int line,
+        HttpRequest *request,
+        bool no_follow_location,
+        bool no_peer_verification,
+        bool no_host_verification,
+        long timeout
+) {
     int status_code = 0;
-    HttpString final_url = NULL;
-    char buffer[BUFFER_SIZE] = {0};
+    HttpString effective_url = NULL;
     CURL *handler = curl_easy_init();
     struct curl_slist *headers_list = NULL;
     HttpBuffer headers_buffer = {0}, body_buffer = {0};
@@ -71,9 +90,10 @@ HttpResponse *__send_request(const char *file, int line, HttpRequest *request, b
         __die(file, line, strerror(errno));
     }
 
-    /* setup raw_headers */
+    /* Fill headers list */
     if (request->headers) {
-        size_t i = 0;
+        size_t i = 0, BUFFER_SIZE = 512;
+        char buffer[BUFFER_SIZE];
         HttpString header_key, header_value;
         while (true) {
             header_key = request->headers[i].key, header_value = request->headers[i].value;
@@ -88,13 +108,15 @@ HttpResponse *__send_request(const char *file, int line, HttpRequest *request, b
 
     /* Set request options */
     curl_easy_setopt(handler, CURLOPT_URL, request->url);
-    curl_easy_setopt(handler, CURLOPT_FOLLOWLOCATION, allow_redirects);
     curl_easy_setopt(handler, CURLOPT_CUSTOMREQUEST, request->method);
     curl_easy_setopt(handler, CURLOPT_HTTPHEADER, headers_list);
-    curl_easy_setopt(handler, CURLOPT_HEADERFUNCTION, __write_buffer_callback);
+    curl_easy_setopt(handler, CURLOPT_HEADERFUNCTION, __callback);
     curl_easy_setopt(handler, CURLOPT_HEADERDATA, &headers_buffer);
-    curl_easy_setopt(handler, CURLOPT_WRITEFUNCTION, __write_buffer_callback);
+    curl_easy_setopt(handler, CURLOPT_WRITEFUNCTION, __callback);
     curl_easy_setopt(handler, CURLOPT_WRITEDATA, &body_buffer);
+    curl_easy_setopt(handler, CURLOPT_FOLLOWLOCATION, !no_follow_location);
+    curl_easy_setopt(handler, CURLOPT_SSL_VERIFYPEER, !no_peer_verification);
+    curl_easy_setopt(handler, CURLOPT_SSL_VERIFYHOST, !no_host_verification);
     if (request->body) {
         curl_easy_setopt(handler, CURLOPT_POSTFIELDS, request->body);
         curl_easy_setopt(handler, CURLOPT_POSTFIELDSIZE, strlen(request->body));
@@ -116,12 +138,12 @@ HttpResponse *__send_request(const char *file, int line, HttpRequest *request, b
 
     /* Get the response info */
     curl_easy_getinfo(handler, CURLINFO_RESPONSE_CODE, &status_code);
-    if (allow_redirects) {
+    if (no_follow_location) {
+        effective_url = http_string_new(request->url);
+    } else {
         char *tmp = NULL;
         curl_easy_getinfo(handler, CURLINFO_EFFECTIVE_URL, &tmp);
-        final_url = http_string_new(tmp);
-    } else {
-        final_url = http_string_new(request->url);
+        effective_url = http_string_new(tmp);
     }
 
     /* Terminate */
@@ -131,7 +153,7 @@ HttpResponse *__send_request(const char *file, int line, HttpRequest *request, b
     return http_response_bake(
             request,
             status_code,
-            final_url,
+            effective_url,
             headers_buffer.memory,
             headers_buffer.size,
             body_buffer.memory,
