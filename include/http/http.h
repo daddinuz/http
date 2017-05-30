@@ -17,7 +17,7 @@
 #ifndef __HTTP_H__
 #define __HTTP_H__
 
-#define HTTP_VERSION "0.2.3"
+#define HTTP_VERSION "0.2.4"
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,7 +25,6 @@ extern "C" {
 
 typedef struct HttpParams {
     int __sentinel__;
-    const char *url;
     HttpDictEntry *headers;
     const char *body;
     bool no_follow_location;
@@ -34,16 +33,15 @@ typedef struct HttpParams {
     long timeout;
 } HttpParams;
 
-#define http_request(method, ...)   __http_perform(__FILE__, __LINE__, method, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
-#define http_get(...)               __http_perform(__FILE__, __LINE__, HttpMethod.GET, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
-#define http_head(...)              __http_perform(__FILE__, __LINE__, HttpMethod.HEAD, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
-#define http_delete(...)            __http_perform(__FILE__, __LINE__, HttpMethod.DELETE, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
-#define http_options(...)           __http_perform(__FILE__, __LINE__, HttpMethod.OPTIONS, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
-#define http_put(...)               __http_perform(__FILE__, __LINE__, HttpMethod.PUT, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
-#define http_post(...)              __http_perform(__FILE__, __LINE__, HttpMethod.POST, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
-#define http_patch(...)             __http_perform(__FILE__, __LINE__, HttpMethod.PATCH, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
+extern HttpResponse *http_request(HttpString method, HttpString url, HttpParams *params);
 
-extern HttpResponse *__http_perform(const char *file, int line, HttpString method, HttpParams *params);
+#define http_get(url, ...)      http_request(HttpMethod.GET, url, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
+#define http_head(url, ...)     http_request(HttpMethod.HEAD, url, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
+#define http_delete(url, ...)   http_request(HttpMethod.DELETE, url, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
+#define http_options(url, ...)  http_request(HttpMethod.OPTIONS, url, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
+#define http_put(url, ...)      http_request(HttpMethod.PUT, url, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
+#define http_post(url, ...)     http_request(HttpMethod.POST, url, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
+#define http_patch(url, ...)    http_request(HttpMethod.PATCH, url, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
 
 #ifdef __cplusplus
 }
