@@ -9,7 +9,7 @@ while [ ${x} -le 5 ]; do
     echo
 
     echo "C"
-    \time -p ./cmake-build-release/example 2>&1
+    \time -p ./cmake-build-release/bench 2>&1
     echo
 
     x=$(( ${x} + 1 ))

@@ -31,3 +31,6 @@ target_link_libraries(http PRIVATE curl hashmap)
 ###
 add_executable(example ${EXAMPLE_PATH}/example.c)
 target_link_libraries(example PRIVATE ${PROJECT_NAME})
+
+add_executable(bench ${EXAMPLE_PATH}/bench.c)
+target_link_libraries(bench PRIVATE ${PROJECT_NAME})
