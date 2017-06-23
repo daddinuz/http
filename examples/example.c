@@ -34,7 +34,7 @@ int main() {
         HttpString body = http_string_copy("{\"title\":\"Test issue opened with http\",\"body\":\"That's cool.\"}");
 
         response = http_post(base_url, .headers=headers, .body=body);
-        assert(response->status_code != HTTP_STATUS.OK)
+        assert(response->status_code != HTTP_STATUS.OK);
 
         printf("url: %s\nstatus: %d\n\n%s\n%s\n",
                response->url, response->status_code, response->raw_headers, response->raw_body
@@ -50,7 +50,7 @@ int main() {
      */
     {
         response = http_get(target_issue_url, .headers=headers);
-        assert(response->status_code != HTTP_STATUS.OK)
+        assert(response->status_code != HTTP_STATUS.OK);
 
         printf("url: %s\nstatus: %d\n\n%s\n%s\n",
                response->url, response->status_code, response->raw_headers, response->raw_body
@@ -68,7 +68,7 @@ int main() {
         HttpString body = http_string_copy("{\"state\":\"closed\"}");
 
         response = http_patch(target_issue_url, .headers=headers, .body=body);
-        assert(response->status_code != HTTP_STATUS.OK)
+        assert(response->status_code != HTTP_STATUS.OK);
 
         printf("url: %s\nstatus: %d\n\n%s\n%s\n",
                response->url, response->status_code, response->raw_headers, response->raw_body
