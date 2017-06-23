@@ -15,7 +15,7 @@
 extern "C" {
 #endif
 
-typedef struct __HttpMethod {
+static const struct {
     HttpString GET;
     HttpString PUT;
     HttpString HEAD;
@@ -23,10 +23,7 @@ typedef struct __HttpMethod {
     HttpString PATCH;
     HttpString DELETE;
     HttpString OPTIONS;
-} __HttpMethod;
-
-/* NOTE: this is the only place where HttpString is not dynamic allocated in memory */
-static const __HttpMethod HttpMethod = {
+} HTTP_METHOD = {
         .GET="GET",
         .PUT="PUT",
         .HEAD="HEAD",

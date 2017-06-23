@@ -13,7 +13,7 @@
 extern "C" {
 #endif
 
-typedef struct __HttpStatus {
+static const struct {
     int CONTINUE;
     int SWITCHING_PROTOCOLS;
     int OK;
@@ -56,9 +56,7 @@ typedef struct __HttpStatus {
     int SERVICE_UNAVAILABLE;
     int GATEWAY_TIMEOUT;
     int VERSION_NOT_SUPPORTED;
-} __HttpStatus;
-
-static const __HttpStatus HttpStatus = {
+} HTTP_STATUS = {
         .CONTINUE = 100,
         .SWITCHING_PROTOCOLS = 101,
         .OK = 200,

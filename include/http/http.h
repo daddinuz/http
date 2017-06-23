@@ -23,6 +23,9 @@
 extern "C" {
 #endif
 
+/**
+ * Structure holding request parameters
+ */
 typedef struct HttpParams {
     int __sentinel__;
     HttpDict *headers;
@@ -33,15 +36,23 @@ typedef struct HttpParams {
     long timeout;
 } HttpParams;
 
+/**
+ * Compose and send an HTTP request.
+ *
+ * @param method Request HttpMethod
+ * @param url URL to call
+ * @param params Request parameters
+ * @return The HttpResponse related to the sent request
+ */
 extern const HttpResponse *http_request(HttpString method, HttpString url, HttpParams *params);
 
-#define http_get(url, ...)      http_request(HttpMethod.GET, url, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
-#define http_head(url, ...)     http_request(HttpMethod.HEAD, url, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
-#define http_delete(url, ...)   http_request(HttpMethod.DELETE, url, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
-#define http_options(url, ...)  http_request(HttpMethod.OPTIONS, url, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
-#define http_put(url, ...)      http_request(HttpMethod.PUT, url, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
-#define http_post(url, ...)     http_request(HttpMethod.POST, url, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
-#define http_patch(url, ...)    http_request(HttpMethod.PATCH, url, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
+#define http_get(url, ...)      http_request(HTTP_METHOD.GET, url, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
+#define http_head(url, ...)     http_request(HTTP_METHOD.HEAD, url, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
+#define http_delete(url, ...)   http_request(HTTP_METHOD.DELETE, url, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
+#define http_options(url, ...)  http_request(HTTP_METHOD.OPTIONS, url, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
+#define http_put(url, ...)      http_request(HTTP_METHOD.PUT, url, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
+#define http_post(url, ...)     http_request(HTTP_METHOD.POST, url, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
+#define http_patch(url, ...)    http_request(HTTP_METHOD.PATCH, url, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
 
 #ifdef __cplusplus
 }

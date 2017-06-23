@@ -13,7 +13,7 @@
 #include "http.h"
 
 /*
- * Internal types definitions
+ * Private types definitions
  */
 typedef struct __buffer_t {
     size_t size;
@@ -21,14 +21,14 @@ typedef struct __buffer_t {
 } __buffer_t;
 
 /*
- * Internal functions declarations
+ * Private functions declarations
  */
 static struct curl_slist *__make_headers(HttpDict *dict);
 static void __die(const char *file, int line, const char *message);
 static size_t __callback(void *content, size_t member_size, size_t members_count, void *user_data);
 
 /*
- * API definitions
+ * API functions definitions
  */
 const HttpResponse *http_request(HttpString method, HttpString url, HttpParams *params) {
     const HttpRequest *request = http_request_new(method, url, params->headers, params->body);
@@ -75,11 +75,11 @@ const HttpResponse *http_request(HttpString method, HttpString url, HttpParams *
     /* Get the response info */
     curl_easy_getinfo(handler, CURLINFO_RESPONSE_CODE, &status_code);
     if (params->no_follow_location) {
-        effective_url = http_string_new(request->url);
+        effective_url = http_string_copy(request->url);
     } else {
         char *tmp = NULL;
         curl_easy_getinfo(handler, CURLINFO_EFFECTIVE_URL, &tmp);
-        effective_url = http_string_new(tmp);
+        effective_url = http_string_copy(tmp);
     }
 
     /* Terminate */
@@ -98,7 +98,7 @@ const HttpResponse *http_request(HttpString method, HttpString url, HttpParams *
 }
 
 /*
- * Internal functions definitions
+ * Private functions definitions
  */
 bool __make_headers_callback(char *key, char *value, void *context) {
     struct curl_slist **headers_list_reference = context;

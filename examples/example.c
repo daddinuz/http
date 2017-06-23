@@ -6,6 +6,7 @@
  * email:  daddinuz@gmail.com
  */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -16,7 +17,7 @@
  */
 int main() {
     HttpString auth_token = http_string_join("token ", getenv("GITHUB_AUTH_TOKEN"));
-    HttpString base_url = http_string_new("https://api.github.com/repos/daddinuz/http/issues");
+    HttpString base_url = http_string_copy("https://api.github.com/repos/daddinuz/http/issues");
     HttpString target_issue_url = http_string_join(base_url, "/16");
     HttpDict *headers = http_dict_new();
     const HttpResponse *response = NULL;
@@ -30,10 +31,12 @@ int main() {
      * Create an issue
      */
     {
-        HttpString body = http_string_new("{\"title\":\"Test issue opened with http\",\"body\":\"That's cool.\"}");
+        HttpString body = http_string_copy("{\"title\":\"Test issue opened with http\",\"body\":\"That's cool.\"}");
 
         response = http_post(base_url, .headers=headers, .body=body);
-        printf("url: %s\nstatus_code: %d\n\n%s\n%s\n",
+        assert(response->status_code != HTTP_STATUS.OK)
+
+        printf("url: %s\nstatus: %d\n\n%s\n%s\n",
                response->url, response->status_code, response->raw_headers, response->raw_body
         );
 
@@ -47,7 +50,9 @@ int main() {
      */
     {
         response = http_get(target_issue_url, .headers=headers);
-        printf("url: %s\nstatus_code: %d\n\n%s\n%s\n",
+        assert(response->status_code != HTTP_STATUS.OK)
+
+        printf("url: %s\nstatus: %d\n\n%s\n%s\n",
                response->url, response->status_code, response->raw_headers, response->raw_body
         );
 
@@ -60,10 +65,12 @@ int main() {
      * Close an issue
      */
     {
-        HttpString body = http_string_new("{\"state\":\"closed\"}");
+        HttpString body = http_string_copy("{\"state\":\"closed\"}");
 
         response = http_patch(target_issue_url, .headers=headers, .body=body);
-        printf("url: %s\nstatus_code: %d\n\n%s\n%s\n",
+        assert(response->status_code != HTTP_STATUS.OK)
+
+        printf("url: %s\nstatus: %d\n\n%s\n%s\n",
                response->url, response->status_code, response->raw_headers, response->raw_body
         );
 
