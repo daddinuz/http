@@ -3,7 +3,7 @@
  *
  * Author: Davide Di Carlo
  * Date:   May 26, 2017 
- * email:  daddinuz@gmal.com
+ * email:  daddinuz@gmail.com
  */
 
 #include <stdlib.h>

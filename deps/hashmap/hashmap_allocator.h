@@ -3,7 +3,7 @@
  *
  * Author: Davide Di Carlo
  * Date:   June 08, 2017
- * email:  daddinuz@gmal.com
+ * email:  daddinuz@gmail.com
  */
 
 /*

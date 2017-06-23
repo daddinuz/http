@@ -3,7 +3,7 @@
  *
  * Author: Davide Di Carlo
  * Date:   May 28, 2017 
- * email:  daddinuz@gmal.com
+ * email:  daddinuz@gmail.com
  */
 
 #ifndef __HTTP_STRING_H__
