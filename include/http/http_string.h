@@ -13,12 +13,34 @@
 extern "C" {
 #endif
 
+/**
+ * HttpString(s) are immutable dynamic allocated char *
+ */
 typedef const char *HttpString;
 
-extern HttpString http_string_new(const char *str);
-extern void http_string_delete(HttpString self);
+/**
+ * Create a new string from `text`.
+ *
+ * @param text The text that will be copied in the string
+ * @return A new HttpString instance
+ */
+extern HttpString http_string_new(const char *text);
 
+/**
+ * Create a new string concatenating together two strings.
+ *
+ * @param a The first string
+ * @param b The second string
+ * @return A new HttpString instance
+ */
 extern HttpString http_string_join(const char *a, const char *b);
+
+/**
+ * Delete an HttpString instance.
+ *
+ * @param self The string to be deleted
+ */
+extern void http_string_delete(HttpString self);
 
 #ifdef __cplusplus
 }

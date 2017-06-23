@@ -16,15 +16,16 @@ extern "C" {
 #endif
 
 typedef struct __HttpMethod {
-    const HttpString GET;
-    const HttpString PUT;
-    const HttpString HEAD;
-    const HttpString POST;
-    const HttpString PATCH;
-    const HttpString DELETE;
-    const HttpString OPTIONS;
+    HttpString GET;
+    HttpString PUT;
+    HttpString HEAD;
+    HttpString POST;
+    HttpString PATCH;
+    HttpString DELETE;
+    HttpString OPTIONS;
 } __HttpMethod;
 
+/* NOTE: this is the only place where HttpString is not dynamic allocated in memory */
 static const __HttpMethod HttpMethod = {
         .GET="GET",
         .PUT="PUT",

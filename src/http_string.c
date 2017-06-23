@@ -14,8 +14,8 @@ static char *__http_string_init(size_t size) {
     return calloc(size + 1, sizeof(char));
 }
 
-HttpString http_string_new(const char *str) {
-    return str ? strdup(str) : NULL;
+HttpString http_string_new(const char *text) {
+    return text ? strdup(text) : NULL;
 }
 
 void http_string_delete(HttpString self) {
