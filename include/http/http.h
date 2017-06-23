@@ -38,6 +38,7 @@ typedef struct HttpParams {
 
 /**
  * Compose and send an HTTP request.
+ * If memory allocation fails, this function returns NULL, and errno is set to ENOMEM.
  *
  * @param method Request HttpMethod
  * @param url URL to call

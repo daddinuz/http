@@ -8,6 +8,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include "http_response.h"
 
 const HttpResponse *http_response_new(
@@ -19,6 +20,11 @@ const HttpResponse *http_response_new(
         HttpString raw_body,
         size_t body_length
 ) {
+    HttpResponse *self = malloc(sizeof(HttpResponse));
+    if (NULL == self) {
+        errno = ENOMEM;
+        return NULL;
+    }
     HttpResponse initializer = {
             .request=(HttpRequest *) request,
             .status_code=status_code,
@@ -28,9 +34,8 @@ const HttpResponse *http_response_new(
             .raw_body=raw_body,
             .body_length=body_length
     };
-    HttpResponse *response = malloc(sizeof(HttpResponse));
-    memcpy(response, &initializer, sizeof(HttpResponse));
-    return response;
+    memcpy(self, &initializer, sizeof(HttpResponse));
+    return self;
 }
 
 void http_response_delete(const HttpResponse *self) {

@@ -33,7 +33,8 @@ typedef struct HttpResponse {
  * Construct a new HttpResponse object.
  * This function just puts together all the pieces needed to construct
  * an HttpResponse object without performing any operation on them, so
- * it expects `url`, `raw_headers`, `raw_body` to be HttpString(s) allocated using `http_string_new`
+ * it expects `url`, `raw_headers`, `raw_body` to be HttpString(s) allocated using `http_string_new`.
+ * If memory allocation fails, this function returns NULL, and errno is set to ENOMEM.
  *
  * @param request           The associated http request
  * @param status_code       The response http status code

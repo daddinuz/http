@@ -8,6 +8,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include "http_request.h"
 
 const HttpRequest *http_request_new(
@@ -16,15 +17,19 @@ const HttpRequest *http_request_new(
         HttpDict *headers,
         HttpString body
 ) {
+    HttpRequest *self = malloc(sizeof(HttpRequest));
+    if (NULL == self) {
+        errno = ENOMEM;
+        return NULL;
+    }
     HttpRequest initializer = {
             .method=method,
             .url=url,
             .headers=headers,
             .body=body
     };
-    HttpRequest *request = malloc(sizeof(HttpRequest));
-    memcpy(request, &initializer, sizeof(HttpRequest));
-    return request;
+    memcpy(self, &initializer, sizeof(HttpRequest));
+    return self;
 }
 
 void http_request_delete(const HttpRequest *self) {

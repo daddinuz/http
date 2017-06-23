@@ -30,7 +30,8 @@ typedef struct HttpRequest {
  * Construct a new HttpRequest object.
  * This function just puts together all the pieces needed to construct
  * an HttpRequest object without performing any operation on them, so
- * it expects `method`, `url`, `body` to be HttpString(s) allocated using `http_string_new`
+ * it expects `method`, `url`, `body` to be HttpString(s) allocated using `http_string_new`.
+ * If memory allocation fails, this function returns NULL, and errno is set to ENOMEM.
  *
  * @param method    Http method
  * @param url       URL to call

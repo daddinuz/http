@@ -32,15 +32,19 @@ static size_t __callback(void *content, size_t member_size, size_t members_count
  */
 const HttpResponse *http_request(HttpString method, HttpString url, HttpParams *params) {
     const HttpRequest *request = http_request_new(method, url, params->headers, params->body);
+    if (ENOMEM == errno && NULL == request) {
+        errno = ENOMEM;
+        return NULL;
+    }
+    CURL *handler = curl_easy_init();
+    if (ENOMEM == errno && NULL == request) {
+        errno = ENOMEM;
+        return NULL;
+    }
     int status_code = 0;
     HttpString effective_url = NULL;
-    CURL *handler = curl_easy_init();
-    struct curl_slist *headers_list = __make_headers(request->headers);
     __buffer_t headers_buffer = {0}, body_buffer = {0};
-
-    if (NULL == handler) {
-        __die(__FILE__, __LINE__, strerror(errno));
-    }
+    struct curl_slist *headers_list = __make_headers(request->headers);
 
     /* Set request options */
     curl_easy_setopt(handler, CURLOPT_URL, request->url);
@@ -81,6 +85,10 @@ const HttpResponse *http_request(HttpString method, HttpString url, HttpParams *
         curl_easy_getinfo(handler, CURLINFO_EFFECTIVE_URL, &tmp);
         effective_url = http_string_copy(tmp);
     }
+    if (ENOMEM == errno && NULL == effective_url) {
+        errno = ENOMEM;
+        return NULL;
+    }
 
     /* Terminate */
     curl_easy_cleanup(handler);
@@ -114,7 +122,7 @@ struct curl_slist *__make_headers(HttpDict *dict) {
         return NULL;
     }
     struct curl_slist *headers_list = NULL;
-    http_dict_each((HttpDict *) dict, __make_headers_callback, &headers_list);
+    http_dict_each(dict, __make_headers_callback, &headers_list);
     return headers_list;
 }
 
@@ -130,7 +138,6 @@ static size_t __callback(void *content, size_t member_size, size_t members_count
     buffer->memory = realloc(buffer->memory, buffer->size + real_size + 1);
     if (NULL == buffer->memory) {
         __die(__FILE__, __LINE__, strerror(errno));
-        abort();
     }
 
     memcpy(&(buffer->memory[buffer->size]), content, real_size);
