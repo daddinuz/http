@@ -9,17 +9,25 @@ if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
 endif ()
 
 set(DEPENDENCY_PATH ${PROJECT_SOURCE_DIR}/deps)
-set(ARCHIVE_PATH ${PROJECT_SOURCE_DIR})
-set(TEST_PATH ${PROJECT_SOURCE_DIR}/test)
+set(EXAMPLE_PATH ${PROJECT_SOURCE_DIR}/examples)
+
+#####
+# Dependencies
+###
+include_directories(deps/hashmap)
+include(deps/hashmap/hashmap.cmake)
 
 #####
 # Archive
 ###
-include(${PROJECT_NAME}.cmake)
+include_directories(${PROJECT_SOURCE_DIR}/include/http)
+file(GLOB HEADER_FILES ${PROJECT_SOURCE_DIR}/include/http/*.h)
+file(GLOB SOURCE_FILES ${PROJECT_SOURCE_DIR}/src/*.c)
+add_library(http ${HEADER_FILES} ${SOURCE_FILES})
+target_link_libraries(http PRIVATE curl hashmap)
 
 #####
 # Examples
 ###
-set(EXAMPLE_PATH ${PROJECT_SOURCE_DIR}/examples)
 add_executable(example ${EXAMPLE_PATH}/example.c)
 target_link_libraries(example PRIVATE ${PROJECT_NAME})

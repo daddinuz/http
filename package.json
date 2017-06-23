@@ -1,0 +1,32 @@
+{
+  "name": "http",
+  "version": "0.2.5",
+  "repo": "daddinuz/http",
+  "description": "HTTP requests made easier.",
+  "keywords": [
+    "http",
+    "https",
+    "requests"
+  ],
+  "license": "MIT",
+  "makefile": "http.cmake",
+  "src": [
+    "include/http/http.h",
+    "include/http/http_pair.h",
+    "include/http/http_dict.h",
+    "include/http/http_string.h",
+    "include/http/http_method.h",
+    "include/http/http_status.h",
+    "include/http/http_request.h",
+    "include/http/http_response.h",
+    "src/http.h",
+    "src/http_pair.h",
+    "src/http_dict.h",
+    "src/http_string.h",
+    "src/http_request.h",
+    "src/http_response.h"
+  ],
+  "dependencies": {
+    "daddinuz/hashmap": "0.1.1"
+  }
+}

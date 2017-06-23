@@ -18,6 +18,8 @@ typedef const char *HttpString;
 extern HttpString http_string_new(const char *str);
 extern void http_string_delete(HttpString self);
 
+extern HttpString http_string_join(const char *a, const char *b);
+
 #ifdef __cplusplus
 }
 #endif

@@ -6,10 +6,10 @@
  * email:  daddinuz@gmal.com
  */
 
-#include "http_string.h"
-
 #ifndef __HTTP_METHOD_H__
 #define __HTTP_METHOD_H__
+
+#include "http_string.h"
 
 #ifdef __cplusplus
 extern "C" {

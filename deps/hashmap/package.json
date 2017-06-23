@@ -1,0 +1,21 @@
+{
+  "name": "hashmap",
+  "version": "0.1.1",
+  "repo": "daddinuz/hashmap",
+  "description": "Maps are associative containers that store elements formed by a combination of a key value and a mapped value.",
+  "keywords": [
+    "map",
+    "containers",
+    "collections"
+  ],
+  "license": "MIT",
+  "makefile": "hashmap.cmake",
+  "src": [
+    "src/hashmap.c",
+    "src/hashmap.h",
+    "src/hashmap_allocator.h"
+  ],
+  "development": {
+    "daddinuz/Traits": "1.1.0"
+  }
+}

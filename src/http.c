@@ -23,38 +23,23 @@ typedef struct __buffer_t {
 /*
  * Internal functions declarations
  */
+static struct curl_slist *__make_headers(HttpDict *dict);
 static void __die(const char *file, int line, const char *message);
 static size_t __callback(void *content, size_t member_size, size_t members_count, void *user_data);
 
 /*
  * API definitions
  */
-HttpResponse *http_request(const HttpString method, const HttpString url, HttpParams *params) {
-    HttpRequest *request = http_request_new(method, url, params->headers, params->body);
+const HttpResponse *http_request(HttpString method, HttpString url, HttpParams *params) {
+    const HttpRequest *request = http_request_new(method, url, params->headers, params->body);
     int status_code = 0;
     HttpString effective_url = NULL;
     CURL *handler = curl_easy_init();
-    struct curl_slist *headers_list = NULL;
+    struct curl_slist *headers_list = __make_headers(request->headers);
     __buffer_t headers_buffer = {0}, body_buffer = {0};
 
     if (NULL == handler) {
         __die(__FILE__, __LINE__, strerror(errno));
-    }
-
-    /* Fill headers list */
-    if (request->headers) {
-        size_t i = 0, BUFFER_SIZE = 512;
-        char buffer[BUFFER_SIZE];
-        HttpString header_key, header_value;
-        while (true) {
-            header_key = request->headers[i].key, header_value = request->headers[i].value;
-            if (!(header_key && header_value)) {
-                break;
-            }
-            snprintf(buffer, BUFFER_SIZE, "%s: %s", header_key, header_value);
-            headers_list = curl_slist_append(headers_list, buffer);
-            i += 1;
-        }
     }
 
     /* Set request options */
@@ -101,7 +86,7 @@ HttpResponse *http_request(const HttpString method, const HttpString url, HttpPa
     curl_easy_cleanup(handler);
     curl_slist_free_all(headers_list);
 
-    return http_response_bake(
+    return http_response_new(
             request,
             status_code,
             effective_url,
@@ -115,6 +100,24 @@ HttpResponse *http_request(const HttpString method, const HttpString url, HttpPa
 /*
  * Internal functions definitions
  */
+bool __make_headers_callback(char *key, char *value, void *context) {
+    struct curl_slist **headers_list_reference = context;
+    const size_t BUFFER_SIZE = 512;
+    char buffer[BUFFER_SIZE];
+    snprintf(buffer, BUFFER_SIZE, "%s: %s", key, value);
+    *headers_list_reference = curl_slist_append(*headers_list_reference, buffer);
+    return true;
+}
+
+struct curl_slist *__make_headers(HttpDict *dict) {
+    if (dict == NULL) {
+        return NULL;
+    }
+    struct curl_slist *headers_list = NULL;
+    http_dict_each((HttpDict *) dict, __make_headers_callback, &headers_list);
+    return headers_list;
+}
+
 void __die(const char *file, int line, const char *message) {
     fprintf(stderr, "\nAt: %s:%d\nError: %s\n", file, line, message);
     abort();

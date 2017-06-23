@@ -10,8 +10,8 @@
 #include <string.h>
 #include "http_response.h"
 
-HttpResponse *http_response_bake(
-        HttpRequest *request,
+const HttpResponse *http_response_new(
+        const HttpRequest *request,
         int status_code,
         HttpString url,
         HttpString raw_headers,
@@ -20,7 +20,7 @@ HttpResponse *http_response_bake(
         size_t body_length
 ) {
     HttpResponse initializer = {
-            .request=request,
+            .request=(HttpRequest *) request,
             .status_code=status_code,
             .url=url,
             .raw_headers=raw_headers,
@@ -33,29 +33,11 @@ HttpResponse *http_response_bake(
     return response;
 }
 
-HttpResponse *http_response_new(
-        HttpRequest *request,
-        int status_code,
-        const char *url,
-        const char *raw_headers,
-        const char *raw_body
-) {
-    return http_response_bake(
-            request,
-            status_code,
-            http_string_new(url),
-            http_string_new(raw_headers),
-            strlen(raw_headers),
-            http_string_new(raw_body),
-            strlen(raw_body)
-    );
-}
-
-void http_response_delete(HttpResponse *self) {
+void http_response_delete(const HttpResponse *self) {
     if (self) {
         http_string_delete(self->url);
         http_string_delete(self->raw_headers);
         http_string_delete(self->raw_body);
     }
-    free(self);
+    free((HttpResponse *) self);
 }

@@ -15,41 +15,38 @@
  *
  */
 int main() {
-    char url[64] = {0};
-    char auth_token[64] = {0};
-    HttpResponse *response = NULL;
-    HttpDict headers = http_dict_create(
-            http_dict_entry_create("Authorization", auth_token),
-            http_dict_entry_create("Accept", "application/vnd.github.VERSION.raw+json"),
-            http_dict_entry_create("Content-Type", "application/json"),
-            http_dict_entry_create("User-Agent", "daddinuz/http")
-    );
+    HttpString auth_token = http_string_join("token ", getenv("GITHUB_AUTH_TOKEN"));
+    HttpString base_url = http_string_new("https://api.github.com/repos/daddinuz/http/issues");
+    HttpString target_issue_url = http_string_join(base_url, "/16");
+    HttpDict *headers = http_dict_new();
+    const HttpResponse *response = NULL;
 
-    strcpy(url, "https://api.github.com/repos/daddinuz/http/issues");
-    sprintf(auth_token, "token %s", getenv("GITHUB_AUTH_TOKEN"));
+    http_dict_set(headers, "Authorization", (char *) auth_token);
+    http_dict_set(headers, "Accept", "application/vnd.github.VERSION.raw+json");
+    http_dict_set(headers, "Content-Type", "application/json");
+    http_dict_set(headers, "User-Agent", "daddinuz/http");
 
     /**
      * Create an issue
      */
     {
-        const char *body = "{\"title\":\"Test issue opened with http\",\"body\":\"That's cool.\"}";
+        HttpString body = http_string_new("{\"title\":\"Test issue opened with http\",\"body\":\"That's cool.\"}");
 
-        response = http_post(url, .headers=headers, .body=body);
+        response = http_post(base_url, .headers=headers, .body=body);
         printf("url: %s\nstatus_code: %d\n\n%s\n%s\n",
                response->url, response->status_code, response->raw_headers, response->raw_body
         );
 
         http_request_delete(response->request);
         http_response_delete(response);
+        http_string_delete(body);
     }
-
-    strcat(url, "/10");
 
     /**
      * Get an issue
      */
     {
-        response = http_get(url, .headers=headers);
+        response = http_get(target_issue_url, .headers=headers);
         printf("url: %s\nstatus_code: %d\n\n%s\n%s\n",
                response->url, response->status_code, response->raw_headers, response->raw_body
         );
@@ -63,16 +60,21 @@ int main() {
      * Close an issue
      */
     {
-        const char *body = "{\"state\":\"closed\"}";
+        HttpString body = http_string_new("{\"state\":\"closed\"}");
 
-        response = http_patch(url, .headers=headers, .body=body);
+        response = http_patch(target_issue_url, .headers=headers, .body=body);
         printf("url: %s\nstatus_code: %d\n\n%s\n%s\n",
                response->url, response->status_code, response->raw_headers, response->raw_body
         );
 
         http_request_delete(response->request);
         http_response_delete(response);
+        http_string_delete(body);
     }
 
+    http_dict_delete(headers);
+    http_string_delete(target_issue_url);
+    http_string_delete(base_url);
+    http_string_delete(auth_token);
     return 0;
 }

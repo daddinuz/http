@@ -6,6 +6,11 @@
  * email:  daddinuz@gmal.com
  */
 
+#ifndef __HTTP_H__
+#define __HTTP_H__
+
+#define HTTP_VERSION "0.2.5"
+
 #include <stdbool.h>
 #include "http_dict.h"
 #include "http_string.h"
@@ -14,26 +19,21 @@
 #include "http_request.h"
 #include "http_response.h"
 
-#ifndef __HTTP_H__
-#define __HTTP_H__
-
-#define HTTP_VERSION "0.2.4"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct HttpParams {
     int __sentinel__;
-    HttpDictEntry *headers;
-    const char *body;
+    HttpDict *headers;
+    HttpString body;
     bool no_follow_location;
     bool no_peer_verification;
     bool no_host_verification;
     long timeout;
 } HttpParams;
 
-extern HttpResponse *http_request(HttpString method, HttpString url, HttpParams *params);
+extern const HttpResponse *http_request(HttpString method, HttpString url, HttpParams *params);
 
 #define http_get(url, ...)      http_request(HttpMethod.GET, url, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
 #define http_head(url, ...)     http_request(HttpMethod.HEAD, url, &(HttpParams) {.__sentinel__=0, __VA_ARGS__})
