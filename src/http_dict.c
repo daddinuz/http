@@ -30,12 +30,12 @@ static bool __equals(void *key_a, void *key_b);
  */
 HttpDict *http_dict_new(void) {
     HttpDict *self = malloc(sizeof(HttpDict));
-    if (self == NULL) {
+    if (NULL == self) {
         errno = ENOMEM;
         return NULL;
     }
     self->pimpl = hashmap_new(INITIAL_CAPACITY, __hash, __equals);
-    if (self->pimpl == NULL) {
+    if (NULL == self->pimpl) {
         errno = ENOMEM;
         return NULL;
     }
@@ -43,33 +43,33 @@ HttpDict *http_dict_new(void) {
 }
 
 void http_dict_clear(HttpDict *self) {
-    assert(self != NULL);
+    assert(self);
     hashmap_clear(self->pimpl);
 }
 
 void http_dict_delete(HttpDict *self) {
-    assert(self != NULL);
+    assert(self);
     hashmap_delete(self->pimpl);
     free(self);
 }
 
 char *http_dict_set(HttpDict *self, char *key, char *value) {
-    assert(self != NULL);
+    assert(self);
     return hashmap_set(self->pimpl, key, value);
 }
 
 char *http_dict_get(HttpDict *self, char *key, char *default_value) {
-    assert(self != NULL);
+    assert(self);
     return hashmap_get(self->pimpl, key, default_value);
 }
 
 bool http_dict_has(HttpDict *self, char *key) {
-    assert(self != NULL);
+    assert(self);
     return hashmap_has(self->pimpl, key);
 }
 
 HttpPair *http_dict_remove(HttpDict *self, char *key) {
-    assert(self != NULL);
+    assert(self);
     hashmap_pair_t *pair = hashmap_remove(self->pimpl, key);
     void *k = pair->key;
     void *v = pair->value;
@@ -78,17 +78,17 @@ HttpPair *http_dict_remove(HttpDict *self, char *key) {
 }
 
 bool http_dict_empty(HttpDict *self) {
-    assert(self != NULL);
+    assert(self);
     return hashmap_empty(self->pimpl);
 }
 
 size_t http_dict_size(HttpDict *self) {
-    assert(self != NULL);
+    assert(self);
     return hashmap_size(self->pimpl);
 }
 
 void http_dict_each(HttpDict *self, bool (*callback)(char *key, char *value, void *context), void *context) {
-    assert(self != NULL);
+    assert(self);
     bool (*fn)(void *, void *, void *) = (bool (*)(void *, void *, void *)) callback;
     hashmap_each(self->pimpl, fn, context);
 }

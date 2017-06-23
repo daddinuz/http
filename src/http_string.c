@@ -28,7 +28,7 @@ HttpString http_string_copy(const char *text) {
     char *self = NULL;
     if (text) {
         self = strdup(text);
-        if (self == NULL) {
+        if (NULL == self) {
             errno = ENOMEM;
         }
     }
@@ -40,7 +40,7 @@ HttpString http_string_join(const char *a, const char *b) {
     const char *safe_b = b ? b : "";
     const size_t size = strlen(safe_a) + strlen(safe_b);
     char *self = __http_string_init(size);
-    if (self == NULL) {
+    if (NULL == self) {
         errno = ENOMEM;
         return NULL;
     }
@@ -59,7 +59,7 @@ void http_string_delete(HttpString self) {
  */
 char *__http_string_init(size_t size) {
     char *self = calloc(size + 1, sizeof(char));
-    if (self == NULL) {
+    if (NULL == self) {
         errno = ENOMEM;
     }
     return self;

@@ -110,7 +110,7 @@ bool __make_headers_callback(char *key, char *value, void *context) {
 }
 
 struct curl_slist *__make_headers(HttpDict *dict) {
-    if (dict == NULL) {
+    if (NULL == dict) {
         return NULL;
     }
     struct curl_slist *headers_list = NULL;
@@ -128,7 +128,7 @@ static size_t __callback(void *content, size_t member_size, size_t members_count
     const size_t real_size = member_size * members_count;
 
     buffer->memory = realloc(buffer->memory, buffer->size + real_size + 1);
-    if (buffer->memory == NULL) {
+    if (NULL == buffer->memory) {
         __die(__FILE__, __LINE__, strerror(errno));
         abort();
     }

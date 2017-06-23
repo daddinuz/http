@@ -18,12 +18,12 @@ struct HttpPair {
 
 HttpPair *http_pair_new(char *key, char *value) {
     HttpPair *self = malloc(sizeof(HttpPair));
-    if (self == NULL) {
+    if (NULL == self) {
         errno = ENOMEM;
         return NULL;
     }
     self->pimpl = hashmap_pair_new(key, value);
-    if (self->pimpl == NULL) {
+    if (NULL == self->pimpl) {
         errno = ENOMEM;
         return NULL;
     }
@@ -31,17 +31,17 @@ HttpPair *http_pair_new(char *key, char *value) {
 }
 
 void http_pair_delete(HttpPair *self) {
-    assert(self != NULL);
+    assert(self);
     hashmap_pair_delete(self->pimpl);
     free(self);
 }
 
 char *http_pair_key(HttpPair *self) {
-    assert(self != NULL);
+    assert(self);
     return self->pimpl->key;
 }
 
 char *http_pair_value(HttpPair *self) {
-    assert(self != NULL);
+    assert(self);
     return self->pimpl->value;
 }
