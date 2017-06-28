@@ -9,29 +9,30 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <http_method.h>
 #include "http_request.h"
 
-const HttpRequest *http_request_new(
-        HttpString method,
-        HttpString url,
-        HttpDict *headers,
-        HttpString body
+http_request_t *http_request_new(
+        http_method_t method,
+        const char *url,
+        const char *headers,
+        const char *body
 ) {
-    HttpRequest *self = malloc(sizeof(HttpRequest));
+    http_request_t *self = malloc(sizeof(http_request_t));
     if (NULL == self) {
         errno = ENOMEM;
         return NULL;
     }
-    HttpRequest initializer = {
+    http_request_t initializer = {
             .method=method,
             .url=url,
             .headers=headers,
             .body=body
     };
-    memcpy(self, &initializer, sizeof(HttpRequest));
+    memcpy(self, &initializer, sizeof(http_request_t));
     return self;
 }
 
-void http_request_delete(const HttpRequest *self) {
-    free((HttpRequest *) self);
+void http_request_delete(http_request_t *self) {
+    free(self);
 }

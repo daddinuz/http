@@ -9,49 +9,45 @@
 #ifndef __HTTP_REQUEST_H__
 #define __HTTP_REQUEST_H__
 
-#include "http_dict.h"
-#include "http_string.h"
+#include "http_method.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * Structure holding an Http Request
+ * http_request_t opaque type.
  */
-typedef struct HttpRequest {
-    HttpString method;    /* HTTP method to use. */
-    HttpString url;       /* URL to send. */
-    HttpDict *headers;    /* Headers to be attached to the request. */
-    HttpString body;      /* Body to be attached to the request. */
-} HttpRequest;
+typedef struct http_request {
+    const http_method_t method;
+    const char *url;
+    const char *headers;
+    const char *body;
+} http_request_t;
 
 /**
- * Construct a new HttpRequest object.
- * This function just puts together all the pieces needed to construct
- * an HttpRequest object without performing any operation on them, so
- * it expects `method`, `url`, `body` to be HttpString(s) allocated using `http_string_new`.
+ * Create a new `http_request_t *` instance.
  * If memory allocation fails, this function returns NULL, and errno is set to ENOMEM.
  *
- * @param method    Http method
- * @param url       URL to call
- * @param headers   Http headers
- * @param body      Http body
- * @return `HttpRequest *` The newly created http request
+ * @param method The HTTP request method.
+ * @param url The HTTP request URL.
+ * @param headers The HTTP request headers.
+ * @param body The HTTP request body.
+ * @return A new `http_request_t *` instance.
  */
-extern const HttpRequest *http_request_new(
-        HttpString method,
-        HttpString url,
-        HttpDict *headers,
-        HttpString body
+extern http_request_t *http_request_new(
+        http_method_t method,
+        const char *url,
+        const char *headers,
+        const char *body
 );
 
 /**
- * Delete an HttpRequest object freeing its memory.
+ * Delete an already created `http_request_t *` instance.
  *
- * @param self  The HttpRequest object to delete
+ * @param self The `http_request_t *` instance.
  */
-extern void http_request_delete(const HttpRequest *self);
+extern void http_request_delete(http_request_t *self);
 
 #ifdef __cplusplus
 }

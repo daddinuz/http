@@ -1,6 +1,0 @@
-set(ARCHIVE_NAME http)
-if (NOT DEFINED ARCHIVE_PATH)
-    set(ARCHIVE_PATH deps/${ARCHIVE_NAME})
-endif ()
-
-

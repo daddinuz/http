@@ -11,38 +11,34 @@
 #include <errno.h>
 #include "http_response.h"
 
-const HttpResponse *http_response_new(
-        const HttpRequest *request,
-        int status_code,
-        HttpString url,
-        HttpString raw_headers,
-        size_t headers_length,
-        HttpString raw_body,
-        size_t body_length
+http_response_t *http_response_new(
+        int status,
+        const http_request_t *request,
+        const char *url,
+        const char *headers,
+        const char *body
 ) {
-    HttpResponse *self = malloc(sizeof(HttpResponse));
+    http_response_t *self = malloc(sizeof(http_response_t));
     if (NULL == self) {
         errno = ENOMEM;
         return NULL;
     }
-    HttpResponse initializer = {
-            .request=(HttpRequest *) request,
-            .status_code=status_code,
+    http_response_t initializer = {
+            .request=request,
+            .status=status,
             .url=url,
-            .raw_headers=raw_headers,
-            .headers_length=headers_length,
-            .raw_body=raw_body,
-            .body_length=body_length
+            .headers=headers,
+            .body=body
     };
-    memcpy(self, &initializer, sizeof(HttpResponse));
+    memcpy(self, &initializer, sizeof(http_response_t));
     return self;
 }
 
-void http_response_delete(const HttpResponse *self) {
+void http_response_delete(http_response_t *self) {
     if (self) {
-        http_string_delete(self->url);
-        http_string_delete(self->raw_headers);
-        http_string_delete(self->raw_body);
+        free((void *) self->url);
+        free((void *) self->headers);
+        free((void *) self->body);
+        free(self);
     }
-    free((HttpResponse *) self);
 }

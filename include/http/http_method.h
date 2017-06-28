@@ -9,29 +9,19 @@
 #ifndef __HTTP_METHOD_H__
 #define __HTTP_METHOD_H__
 
-#include "http_string.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-static const struct {
-    HttpString GET;
-    HttpString PUT;
-    HttpString HEAD;
-    HttpString POST;
-    HttpString PATCH;
-    HttpString DELETE;
-    HttpString OPTIONS;
-} HTTP_METHOD = {
-        .GET="GET",
-        .PUT="PUT",
-        .HEAD="HEAD",
-        .POST="POST",
-        .PATCH="PATCH",
-        .DELETE="DELETE",
-        .OPTIONS="OPTIONS"
-};
+typedef enum http_method {
+    HTTP_METHOD_GET,
+    HTTP_METHOD_PUT,
+    HTTP_METHOD_HEAD,
+    HTTP_METHOD_POST,
+    HTTP_METHOD_PATCH,
+    HTTP_METHOD_DELETE,
+    HTTP_METHOD_OPTIONS
+} http_method_t;
 
 #ifdef __cplusplus
 }
