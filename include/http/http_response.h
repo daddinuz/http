@@ -18,32 +18,15 @@ extern "C" {
 /**
  * http_response_t opaque type.
  */
-typedef struct http_response {
+struct http_response {
     const int status;
-    const http_request_t *request;
-    const char *url;
-    const char *headers;
-    const char *body;
-} http_response_t;
+    http_request_t *const request;
+    const char *const url;
+    const char *const headers;
+    const char *const body;
+};
 
-/**
- * Create a new `http_response_t *` instance.
- * If memory allocation fails, this function returns NULL, and errno is set to ENOMEM.
- *
- * @param status The response HTTP status code.
- * @param request The associated HTTP request.
- * @param url The effective URL called.
- * @param headers The response HTTP headers.
- * @param body The response HTTP body.
- * @return A new `http_response_t *` instance.
- */
-extern http_response_t *http_response_new(
-        int status,
-        const http_request_t *request,
-        const char *url,
-        const char *headers,
-        const char *body
-);
+typedef const struct http_response http_response_t;
 
 /**
  * Delete an already created `http_response_t *` instance.

@@ -13,17 +13,17 @@
 #include "http_request.h"
 
 http_request_t *http_request_new(
-        http_method_t method,
-        const char *url,
-        const char *headers,
-        const char *body
+        const http_method_t method,
+        const char *const url,
+        const char *const headers,
+        const char *const body
 ) {
-    http_request_t *self = malloc(sizeof(http_request_t));
+    struct http_request *self = malloc(sizeof(http_request_t));
     if (NULL == self) {
         errno = ENOMEM;
         return NULL;
     }
-    http_request_t initializer = {
+    const http_request_t initializer = {
             .method=method,
             .url=url,
             .headers=headers,
@@ -34,5 +34,5 @@ http_request_t *http_request_new(
 }
 
 void http_request_delete(http_request_t *self) {
-    free(self);
+    free((void *) self);
 }

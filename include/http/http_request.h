@@ -18,12 +18,14 @@ extern "C" {
 /**
  * http_request_t opaque type.
  */
-typedef struct http_request {
+struct http_request {
     const http_method_t method;
-    const char *url;
-    const char *headers;
-    const char *body;
-} http_request_t;
+    const char *const url;
+    const char *const headers;
+    const char *const body;
+};
+
+typedef const struct http_request http_request_t;
 
 /**
  * Create a new `http_request_t *` instance.
@@ -36,10 +38,10 @@ typedef struct http_request {
  * @return A new `http_request_t *` instance.
  */
 extern http_request_t *http_request_new(
-        http_method_t method,
-        const char *url,
-        const char *headers,
-        const char *body
+        const http_method_t method,
+        const char *const url,
+        const char *const headers,
+        const char *const body
 );
 
 /**

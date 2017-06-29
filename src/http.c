@@ -14,6 +14,11 @@
 #include <curl/curl.h>
 #include "http.h"
 
+typedef struct {
+    size_t size;
+    char *memory;
+} buffer_t;
+
 static const char *__HTTP_METHOD_GET_STRING = "GET";
 static const char *__HTTP_METHOD_PUT_STRING = "PUT";
 static const char *__HTTP_METHOD_HEAD_STRING = "HEAD";
@@ -22,11 +27,13 @@ static const char *__HTTP_METHOD_PATCH_STRING = "PATCH";
 static const char *__HTTP_METHOD_DELETE_STRING = "DELETE";
 static const char *__HTTP_METHOD_OPTIONS_STRING = "OPTIONS";
 
-typedef struct {
-    size_t size;
-    char *memory;
-} buffer_t;
-
+static http_response_t *__http_response_new(
+        int status,
+        const http_request_t *request,
+        const char *url,
+        const char *headers,
+        const char *body
+);
 static const char *__http_method_to_string(http_method_t method);
 static void __die(const char *file, int line, const char *message);
 static size_t __callback(void *content, size_t member_size, size_t members_count, void *user_data);
@@ -97,7 +104,30 @@ http_response_t *http_perform(http_request_t *request, http_params_t *params) {
     curl_slist_free_all(headers_list);
     curl_easy_cleanup(handler);
 
-    return http_response_new(status_code, request, effective_url, headers_buffer.memory, body_buffer.memory);
+    return __http_response_new(status_code, request, effective_url, headers_buffer.memory, body_buffer.memory);
+}
+
+http_response_t *__http_response_new(
+        int status,
+        const http_request_t *request,
+        const char *url,
+        const char *headers,
+        const char *body
+) {
+    struct http_response *self = malloc(sizeof(http_response_t));
+    if (NULL == self) {
+        errno = ENOMEM;
+        return NULL;
+    }
+    const http_response_t initializer = {
+            .request=request,
+            .status=status,
+            .url=url,
+            .headers=headers,
+            .body=body
+    };
+    memcpy(self, &initializer, sizeof(http_response_t));
+    return self;
 }
 
 const char *__http_method_to_string(http_method_t method) {

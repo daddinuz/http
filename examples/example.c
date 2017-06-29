@@ -30,16 +30,16 @@ int main() {
         sds body = sdsnew("{\"title\":\"Test issue opened with http\",\"body\":\"That's cool.\"}");
 
         http_request_t *request = http_request_new(HTTP_METHOD_POST, url, headers, body);
-        printf("Request:\nmethod: %d\nurl: %s\nheaders: %s\nbody: %s\n\n\n",
+        printf("[ Request ]\n>>> method: %d\n>>> url: %s\n>>> headers:\n%s\n>>> body:\n%s\n\n\n",
                request->method, request->url, request->headers, request->body
         );
 
         http_response_t *response = http_perform(request, NULL);
         assert(response->status == HTTP_STATUS_CREATED);
-        printf("Response (Request):\nmethod: %d\nurl: %s\nheaders: %s\nbody: %s\n\n",
+        printf("[ Response (Request) ]\n>>> method: %d\n>>> url: %s\n>>> headers:\n%s\n>>> body:\n%s\n\n",
                response->request->method, response->request->url, response->request->headers, response->request->body
         );
-        printf("Response:\nurl: %s\nstatus: %d\nheaders: %s\nbody: %s\n",
+        printf("[ Response ]\n>>> url: %s\n>>> status: %d\n>>> headers:\n%s\n>>> body:\n%s\n",
                response->url, response->status, response->headers, response->body
         );
 
@@ -55,16 +55,16 @@ int main() {
      */
     {
         http_request_t *request = http_request_new(HTTP_METHOD_GET, url, headers, NULL);
-        printf("Request:\nmethod: %d\nurl: %s\nheaders: %s\nbody: %s\n\n\n",
+        printf("[ Request ]\n>>> method: %d\n>>> url: %s\n>>> headers:\n%s\n>>> body:\n%s\n\n\n",
                request->method, request->url, request->headers, request->body
         );
 
         http_response_t *response = http_perform(request, NULL);
         assert(response->status == HTTP_STATUS_OK);
-        printf("Response (Request):\nmethod: %d\nurl: %s\nheaders: %s\nbody: %s\n\n",
+        printf("[ Response (Request) ]\n>>> method: %d\n>>> url: %s\n>>> headers:\n%s\n>>> body:\n%s\n\n",
                response->request->method, response->request->url, response->request->headers, response->request->body
         );
-        printf("Response:\nurl: %s\nstatus: %d\nheaders: %s\nbody: %s\n",
+        printf("[ Response ]\n>>> url: %s\n>>> status: %d\n>>> headers:\n%s\n>>> body:\n%s\n",
                response->url, response->status, response->headers, response->body
         );
 
@@ -79,16 +79,16 @@ int main() {
         sds body = sdsnew("{\"state\":\"closed\"}");
 
         http_request_t *request = http_request_new(HTTP_METHOD_PATCH, url, headers, body);
-        printf("Request:\nmethod: %d\nurl: %s\nheaders: %s\nbody: %s\n\n\n",
+        printf("[ Request ]\n>>> method: %d\n>>> url: %s\n>>> headers:\n%s\n>>> body:\n%s\n\n\n",
                request->method, request->url, request->headers, request->body
         );
 
         http_response_t *response = http_perform(request, NULL);
         assert(response->status == HTTP_STATUS_OK);
-        printf("Response (Request):\nmethod: %d\nurl: %s\nheaders: %s\nbody: %s\n\n",
+        printf("[ Response (Request) ]\n>>> method: %d\n>>> url: %s\n>>> headers:\n%s\n>>> body:\n%s\n\n",
                response->request->method, response->request->url, response->request->headers, response->request->body
         );
-        printf("Response:\nurl: %s\nstatus: %d\nheaders: %s\nbody: %s\n",
+        printf("[ Response ]\n>>> url: %s\n>>> status: %d\n>>> headers:\n%s\n>>> body:\n%s\n",
                response->url, response->status, response->headers, response->body
         );
 
