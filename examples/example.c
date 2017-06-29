@@ -3,76 +3,101 @@
  *
  * Author: Davide Di Carlo
  * Date:   February 11, 2017
- * email:  daddinuz@gmal.com
+ * email:  daddinuz@gmail.com
  */
 
-#include <stdlib.h>
-#include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include "sds.h"
 #include "http.h"
 
 /*
  *
  */
 int main() {
-    char url[64] = {0};
-    char auth_token[64] = {0};
-    HttpResponse *response = NULL;
-    HttpDict headers = http_dict_create(
-            http_dict_entry_create("Authorization", auth_token),
-            http_dict_entry_create("Accept", "application/vnd.github.VERSION.raw+json"),
-            http_dict_entry_create("Content-Type", "application/json"),
-            http_dict_entry_create("User-Agent", "daddinuz/http")
+    sds url = sdsnew("https://api.github.com/repos/daddinuz/http/issues");
+    sds headers = sdscatprintf(
+            sdsempty(),
+            "Authorization: token %s\nAccept: application/vnd.github.VERSION.raw+json\nContent-Type: application/json\nUser-Agent: daddinuz/http",
+            getenv("GITHUB_AUTH_TOKEN")
     );
-
-    strcpy(url, "https://api.github.com/repos/daddinuz/http/issues");
-    sprintf(auth_token, "token %s", getenv("GITHUB_AUTH_TOKEN"));
 
     /**
      * Create an issue
      */
     {
-        const char *body = "{\"title\":\"Test issue opened with http\",\"body\":\"That's cool.\"}";
+        sds body = sdsnew("{\"title\":\"Test issue opened with http\",\"body\":\"That's cool.\"}");
 
-        response = http_post(url, .headers=headers, .body=body);
-        printf("url: %s\nstatus_code: %d\n\n%s\n%s\n",
-               response->url, response->status_code, response->raw_headers, response->raw_body
+        http_request_t *request = http_request_new(HTTP_METHOD_POST, url, headers, body);
+        printf("[ Request ]\n>>> method: %d\n>>> url: %s\n>>> headers:\n%s\n>>> body:\n%s\n\n\n",
+               request->method, request->url, request->headers, request->body
         );
 
-        http_request_delete(response->request);
+        http_response_t *response = http_perform(request, NULL);
+        assert(response->status == HTTP_STATUS_CREATED);
+        printf("[ Response (Request) ]\n>>> method: %d\n>>> url: %s\n>>> headers:\n%s\n>>> body:\n%s\n\n",
+               response->request->method, response->request->url, response->request->headers, response->request->body
+        );
+        printf("[ Response ]\n>>> url: %s\n>>> status: %d\n>>> headers:\n%s\n>>> body:\n%s\n",
+               response->url, response->status, response->headers, response->body
+        );
+
         http_response_delete(response);
+        http_request_delete(request);
+        sdsfree(body);
     }
 
-    strcat(url, "/10");
+    url = sdscat(url, "/39");
 
     /**
      * Get an issue
      */
     {
-        response = http_get(url, .headers=headers);
-        printf("url: %s\nstatus_code: %d\n\n%s\n%s\n",
-               response->url, response->status_code, response->raw_headers, response->raw_body
+        http_request_t *request = http_request_new(HTTP_METHOD_GET, url, headers, NULL);
+        printf("[ Request ]\n>>> method: %d\n>>> url: %s\n>>> headers:\n%s\n>>> body:\n%s\n\n\n",
+               request->method, request->url, request->headers, request->body
         );
 
-        http_request_delete(response->request);
-        http_response_delete(response);
-    }
+        http_response_t *response = http_perform(request, NULL);
+        assert(response->status == HTTP_STATUS_OK);
+        printf("[ Response (Request) ]\n>>> method: %d\n>>> url: %s\n>>> headers:\n%s\n>>> body:\n%s\n\n",
+               response->request->method, response->request->url, response->request->headers, response->request->body
+        );
+        printf("[ Response ]\n>>> url: %s\n>>> status: %d\n>>> headers:\n%s\n>>> body:\n%s\n",
+               response->url, response->status, response->headers, response->body
+        );
 
+        http_response_delete(response);
+        http_request_delete(request);
+    }
 
     /**
      * Close an issue
      */
     {
-        const char *body = "{\"state\":\"closed\"}";
+        sds body = sdsnew("{\"state\":\"closed\"}");
 
-        response = http_patch(url, .headers=headers, .body=body);
-        printf("url: %s\nstatus_code: %d\n\n%s\n%s\n",
-               response->url, response->status_code, response->raw_headers, response->raw_body
+        http_request_t *request = http_request_new(HTTP_METHOD_PATCH, url, headers, body);
+        printf("[ Request ]\n>>> method: %d\n>>> url: %s\n>>> headers:\n%s\n>>> body:\n%s\n\n\n",
+               request->method, request->url, request->headers, request->body
         );
 
-        http_request_delete(response->request);
+        http_response_t *response = http_perform(request, NULL);
+        assert(response->status == HTTP_STATUS_OK);
+        printf("[ Response (Request) ]\n>>> method: %d\n>>> url: %s\n>>> headers:\n%s\n>>> body:\n%s\n\n",
+               response->request->method, response->request->url, response->request->headers, response->request->body
+        );
+        printf("[ Response ]\n>>> url: %s\n>>> status: %d\n>>> headers:\n%s\n>>> body:\n%s\n",
+               response->url, response->status, response->headers, response->body
+        );
+
         http_response_delete(response);
+        http_request_delete(request);
+        sdsfree(body);
     }
 
+    sdsfree(headers);
+    sdsfree(url);
     return 0;
 }

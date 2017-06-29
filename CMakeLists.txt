@@ -5,21 +5,31 @@ set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror -pedantic")
 if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
     # using GCC
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wcast-align -Wbad-function-cast -Wconversion")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wcast-align -Wbad-function-cast")
 endif ()
-
-set(DEPENDENCY_PATH ${PROJECT_SOURCE_DIR}/deps)
-set(ARCHIVE_PATH ${PROJECT_SOURCE_DIR})
-set(TEST_PATH ${PROJECT_SOURCE_DIR}/test)
 
 #####
 # Archive
 ###
-include(${PROJECT_NAME}.cmake)
+include_directories(${PROJECT_SOURCE_DIR}/include/http)
+file(GLOB HEADER_FILES ${PROJECT_SOURCE_DIR}/include/http/*.h)
+file(GLOB SOURCE_FILES ${PROJECT_SOURCE_DIR}/src/*.c)
+add_library(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
+target_link_libraries(${PROJECT_NAME} PRIVATE curl)
+
+#####
+# External
+###
+include(ext/sds/CMakeLists.txt)
 
 #####
 # Examples
 ###
 set(EXAMPLE_PATH ${PROJECT_SOURCE_DIR}/examples)
+
 add_executable(example ${EXAMPLE_PATH}/example.c)
-target_link_libraries(example PRIVATE ${PROJECT_NAME})
+target_include_directories(example PRIVATE ${PROJECT_SOURCE_DIR}/ext/sds)
+target_link_libraries(example PRIVATE ${PROJECT_NAME} sds)
+
+add_executable(bench ${EXAMPLE_PATH}/bench.c)
+target_link_libraries(bench PRIVATE ${PROJECT_NAME})

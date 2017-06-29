@@ -3,49 +3,36 @@
  *
  * Author: Davide Di Carlo
  * Date:   May 26, 2017 
- * email:  daddinuz@gmal.com
+ * email:  daddinuz@gmail.com
  */
 
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
+#include <http_method.h>
 #include "http_request.h"
 
-HttpRequest *http_request_bake(
-        HttpString method,
-        HttpString url,
-        const HttpDictEntry *headers,
-        HttpString body
+http_request_t *http_request_new(
+        const http_method_t method,
+        const char *const url,
+        const char *const headers,
+        const char *const body
 ) {
-    HttpRequest initializer = {
+    struct http_request *self = malloc(sizeof(http_request_t));
+    if (NULL == self) {
+        errno = ENOMEM;
+        return NULL;
+    }
+    const http_request_t initializer = {
             .method=method,
             .url=url,
             .headers=headers,
             .body=body
     };
-    HttpRequest *request = malloc(sizeof(HttpRequest));
-    memcpy(request, &initializer, sizeof(HttpRequest));
-    return request;
+    memcpy(self, &initializer, sizeof(http_request_t));
+    return self;
 }
 
-HttpRequest *http_request_new(
-        const char *method,
-        const char *url,
-        const HttpDictEntry *headers,
-        const char *body
-) {
-    return http_request_bake(
-            http_string_new(method),
-            http_string_new(url),
-            headers,
-            http_string_new(body)
-    );
-}
-
-void http_request_delete(HttpRequest *self) {
-    if (self) {
-        http_string_delete(self->method);
-        http_string_delete(self->url);
-        http_string_delete(self->body);
-    }
-    free(self);
+void http_request_delete(http_request_t *self) {
+    free((void *) self);
 }

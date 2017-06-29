@@ -1,0 +1,3 @@
+file(GLOB HEADER_FILES ${PROJECT_SOURCE_DIR}/ext/sds/*.h)
+file(GLOB SOURCE_FILES ${PROJECT_SOURCE_DIR}/ext/sds/*.c)
+add_library(sds ${HEADER_FILES} ${SOURCE_FILES})

@@ -3,10 +3,8 @@
  *
  * Author: Davide Di Carlo
  * Date:   February 11, 2017 
- * email:  daddinuz@gmal.com
+ * email:  daddinuz@gmail.com
  */
-
-#include "http_string.h"
 
 #ifndef __HTTP_METHOD_H__
 #define __HTTP_METHOD_H__
@@ -15,25 +13,41 @@
 extern "C" {
 #endif
 
-typedef struct __HttpMethod {
-    const HttpString GET;
-    const HttpString PUT;
-    const HttpString HEAD;
-    const HttpString POST;
-    const HttpString PATCH;
-    const HttpString DELETE;
-    const HttpString OPTIONS;
-} __HttpMethod;
-
-static const __HttpMethod HttpMethod = {
-        .GET="GET",
-        .PUT="PUT",
-        .HEAD="HEAD",
-        .POST="POST",
-        .PATCH="PATCH",
-        .DELETE="DELETE",
-        .OPTIONS="OPTIONS"
-};
+typedef enum http_method {
+    HTTP_METHOD_DELETE,
+    HTTP_METHOD_GET,
+    HTTP_METHOD_HEAD,
+    HTTP_METHOD_POST,
+    HTTP_METHOD_PUT,
+    HTTP_METHOD_CONNECT,
+    HTTP_METHOD_OPTIONS,
+    HTTP_METHOD_TRACE,
+    HTTP_METHOD_COPY,
+    HTTP_METHOD_LOCK,
+    HTTP_METHOD_MKCOL,
+    HTTP_METHOD_MOVE,
+    HTTP_METHOD_PROPFIND,
+    HTTP_METHOD_PROPPATCH,
+    HTTP_METHOD_SEARCH,
+    HTTP_METHOD_UNLOCK,
+    HTTP_METHOD_BIND,
+    HTTP_METHOD_REBIND,
+    HTTP_METHOD_UNBIND,
+    HTTP_METHOD_ACL,
+    HTTP_METHOD_REPORT,
+    HTTP_METHOD_MKACTIVITY,
+    HTTP_METHOD_CHECKOUT,
+    HTTP_METHOD_MERGE,
+    HTTP_METHOD_MSEARCH,
+    HTTP_METHOD_NOTIFY,
+    HTTP_METHOD_SUBSCRIBE,
+    HTTP_METHOD_UNSUBSCRIBE,
+    HTTP_METHOD_PATCH,
+    HTTP_METHOD_PURGE,
+    HTTP_METHOD_MKCALENDAR,
+    HTTP_METHOD_LINK,
+    HTTP_METHOD_UNLINK
+} http_method_t;
 
 #ifdef __cplusplus
 }
