@@ -19,13 +19,39 @@ typedef struct {
     char *memory;
 } buffer_t;
 
-static const char *__HTTP_METHOD_GET_STRING = "GET";
-static const char *__HTTP_METHOD_PUT_STRING = "PUT";
-static const char *__HTTP_METHOD_HEAD_STRING = "HEAD";
-static const char *__HTTP_METHOD_POST_STRING = "POST";
-static const char *__HTTP_METHOD_PATCH_STRING = "PATCH";
-static const char *__HTTP_METHOD_DELETE_STRING = "DELETE";
-static const char *__HTTP_METHOD_OPTIONS_STRING = "OPTIONS";
+static const char *const __HTTP_METHOD_DELETE = "DELETE";
+static const char *const __HTTP_METHOD_GET = "GET";
+static const char *const __HTTP_METHOD_HEAD = "HEAD";
+static const char *const __HTTP_METHOD_POST = "POST";
+static const char *const __HTTP_METHOD_PUT = "PUT";
+static const char *const __HTTP_METHOD_CONNECT = "CONNECT";
+static const char *const __HTTP_METHOD_OPTIONS = "OPTIONS";
+static const char *const __HTTP_METHOD_TRACE = "TRACE";
+static const char *const __HTTP_METHOD_COPY = "COPY";
+static const char *const __HTTP_METHOD_LOCK = "LOCK";
+static const char *const __HTTP_METHOD_MKCOL = "MKCOL";
+static const char *const __HTTP_METHOD_MOVE = "MOVE";
+static const char *const __HTTP_METHOD_PROPFIND = "PROPFIND";
+static const char *const __HTTP_METHOD_PROPPATCH = "PROPPATCH";
+static const char *const __HTTP_METHOD_SEARCH = "SEARCH";
+static const char *const __HTTP_METHOD_UNLOCK = "UNLOCK";
+static const char *const __HTTP_METHOD_BIND = "BIND";
+static const char *const __HTTP_METHOD_REBIND = "REBIND";
+static const char *const __HTTP_METHOD_UNBIND = "UNBIND";
+static const char *const __HTTP_METHOD_ACL = "ACL";
+static const char *const __HTTP_METHOD_REPORT = "REPORT";
+static const char *const __HTTP_METHOD_MKACTIVITY = "MKACTIVITY";
+static const char *const __HTTP_METHOD_CHECKOUT = "CHECKOUT";
+static const char *const __HTTP_METHOD_MERGE = "MERGE";
+static const char *const __HTTP_METHOD_MSEARCH = "M-SEARCH";
+static const char *const __HTTP_METHOD_NOTIFY = "NOTIFY";
+static const char *const __HTTP_METHOD_SUBSCRIBE = "SUBSCRIBE";
+static const char *const __HTTP_METHOD_UNSUBSCRIBE = "UNSUBSCRIBE";
+static const char *const __HTTP_METHOD_PATCH = "PATCH";
+static const char *const __HTTP_METHOD_PURGE = "PURGE";
+static const char *const __HTTP_METHOD_MKCALENDAR = "MKCALENDAR";
+static const char *const __HTTP_METHOD_LINK = "LINK";
+static const char *const __HTTP_METHOD_UNLINK = "UNLINK";
 
 static http_response_t *__http_response_new(
         int status,
@@ -132,20 +158,72 @@ http_response_t *__http_response_new(
 
 const char *__http_method_to_string(http_method_t method) {
     switch (method) {
-        case HTTP_METHOD_GET:
-            return __HTTP_METHOD_GET_STRING;
-        case HTTP_METHOD_PUT:
-            return __HTTP_METHOD_PUT_STRING;
-        case HTTP_METHOD_HEAD:
-            return __HTTP_METHOD_HEAD_STRING;
-        case HTTP_METHOD_POST:
-            return __HTTP_METHOD_POST_STRING;
-        case HTTP_METHOD_PATCH:
-            return __HTTP_METHOD_PATCH_STRING;
         case HTTP_METHOD_DELETE:
-            return __HTTP_METHOD_DELETE_STRING;
+            return __HTTP_METHOD_DELETE;
+        case HTTP_METHOD_GET:
+            return __HTTP_METHOD_GET;
+        case HTTP_METHOD_HEAD:
+            return __HTTP_METHOD_HEAD;
+        case HTTP_METHOD_POST:
+            return __HTTP_METHOD_POST;
+        case HTTP_METHOD_PUT:
+            return __HTTP_METHOD_PUT;
+        case HTTP_METHOD_CONNECT:
+            return __HTTP_METHOD_CONNECT;
         case HTTP_METHOD_OPTIONS:
-            return __HTTP_METHOD_OPTIONS_STRING;
+            return __HTTP_METHOD_OPTIONS;
+        case HTTP_METHOD_TRACE:
+            return __HTTP_METHOD_TRACE;
+        case HTTP_METHOD_COPY:
+            return __HTTP_METHOD_COPY;
+        case HTTP_METHOD_LOCK:
+            return __HTTP_METHOD_LOCK;
+        case HTTP_METHOD_MKCOL:
+            return __HTTP_METHOD_MKCOL;
+        case HTTP_METHOD_MOVE:
+            return __HTTP_METHOD_MOVE;
+        case HTTP_METHOD_PROPFIND:
+            return __HTTP_METHOD_PROPFIND;
+        case HTTP_METHOD_PROPPATCH:
+            return __HTTP_METHOD_PROPPATCH;
+        case HTTP_METHOD_SEARCH:
+            return __HTTP_METHOD_SEARCH;
+        case HTTP_METHOD_UNLOCK:
+            return __HTTP_METHOD_UNLOCK;
+        case HTTP_METHOD_BIND:
+            return __HTTP_METHOD_BIND;
+        case HTTP_METHOD_REBIND:
+            return __HTTP_METHOD_REBIND;
+        case HTTP_METHOD_UNBIND:
+            return __HTTP_METHOD_UNBIND;
+        case HTTP_METHOD_ACL:
+            return __HTTP_METHOD_ACL;
+        case HTTP_METHOD_REPORT:
+            return __HTTP_METHOD_REPORT;
+        case HTTP_METHOD_MKACTIVITY:
+            return __HTTP_METHOD_MKACTIVITY;
+        case HTTP_METHOD_CHECKOUT:
+            return __HTTP_METHOD_CHECKOUT;
+        case HTTP_METHOD_MERGE:
+            return __HTTP_METHOD_MERGE;
+        case HTTP_METHOD_MSEARCH:
+            return __HTTP_METHOD_MSEARCH;
+        case HTTP_METHOD_NOTIFY:
+            return __HTTP_METHOD_NOTIFY;
+        case HTTP_METHOD_SUBSCRIBE:
+            return __HTTP_METHOD_SUBSCRIBE;
+        case HTTP_METHOD_UNSUBSCRIBE:
+            return __HTTP_METHOD_UNSUBSCRIBE;
+        case HTTP_METHOD_PATCH:
+            return __HTTP_METHOD_PATCH;
+        case HTTP_METHOD_PURGE:
+            return __HTTP_METHOD_PURGE;
+        case HTTP_METHOD_MKCALENDAR:
+            return __HTTP_METHOD_MKCALENDAR;
+        case HTTP_METHOD_LINK:
+            return __HTTP_METHOD_LINK;
+        case HTTP_METHOD_UNLINK:
+            return __HTTP_METHOD_UNLINK;
         default:
             __die(__FILE__, __LINE__, "Unknown HTTP method");
             return NULL;
