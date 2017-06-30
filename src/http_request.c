@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <http_method.h>
+#include "http_method.h"
 #include "http_request.h"
 
 http_request_t *http_request_new(
