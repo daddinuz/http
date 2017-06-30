@@ -9,7 +9,7 @@
     "requests"
   ],
   "license": "MIT",
-  "makefile": "CMakeLists.txt",
+  "makefile": "http.cmake",
   "src": [
     "include/http/http.h",
     "include/http/http_method.h",

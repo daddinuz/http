@@ -20,7 +20,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE curl)
 #####
 # External
 ###
-include(ext/sds/CMakeLists.txt)
+include(ext/sds/sds.cmake)
 
 #####
 # Examples
