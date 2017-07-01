@@ -21,6 +21,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE curl)
 # External
 ###
 include(ext/sds/sds.cmake)
+include(ext/parson/parson.cmake)
+include(ext/picohttpparser/picohttpparser.cmake)
 
 #####
 # Examples
@@ -28,8 +30,8 @@ include(ext/sds/sds.cmake)
 set(EXAMPLE_PATH ${PROJECT_SOURCE_DIR}/examples)
 
 add_executable(example ${EXAMPLE_PATH}/example.c)
-target_include_directories(example PRIVATE ${PROJECT_SOURCE_DIR}/ext/sds)
-target_link_libraries(example PRIVATE ${PROJECT_NAME} sds)
+target_include_directories(example PRIVATE ${PROJECT_SOURCE_DIR}/ext)
+target_link_libraries(example PRIVATE ${PROJECT_NAME} sds parson picohttpparser)
 
 add_executable(bench ${EXAMPLE_PATH}/bench.c)
 target_link_libraries(bench PRIVATE ${PROJECT_NAME})

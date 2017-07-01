@@ -6,98 +6,139 @@
  * email:  daddinuz@gmail.com
  */
 
-#include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
-#include "sds.h"
+#include <string.h>
+#include <stdio.h>
 #include "http.h"
+#include "sds/sds.h"
+#include "parson/parson.h"
+#include "picohttpparser/picohttpparser.h"
+
+#define MAX_HEADERS 64
+#define MAX_HEADER_LEN 32
 
 /*
  *
  */
 int main() {
-    sds url = sdsnew("https://api.github.com/repos/daddinuz/http/issues");
+    sds created_at = NULL;
+    sds issue_details_url = NULL;
+    sds issues_list_url = sdsnew("https://api.github.com/repos/daddinuz/http/issues");
     sds headers = sdscatprintf(
             sdsempty(),
-            "Authorization: token %s\nAccept: application/vnd.github.VERSION.raw+json\nContent-Type: application/json\nUser-Agent: daddinuz/http",
+            "Authorization: token %s\n"
+                    "Accept: application/vnd.github.VERSION.raw+json\n"
+                    "Content-Type: application/json\n"
+                    "User-Agent: daddinuz/http",
             getenv("GITHUB_AUTH_TOKEN")
     );
 
     /**
-     * Create an issue
+     * Open an issue
      */
     {
-        sds body = sdsnew("{\"title\":\"Test issue opened with http\",\"body\":\"That's cool.\"}");
+        printf("Creating a new issue... ");
 
-        http_request_t *request = http_request_new(HTTP_METHOD_POST, url, headers, body);
-        printf("[ Request ]\n>>> method: %d\n>>> url: %s\n>>> headers:\n%s\n>>> body:\n%s\n\n\n",
-               request->method, request->url, request->headers, request->body
-        );
-
+        /* performing request */
+        const char *body = "{\"title\":\"Test issue opened with http.\",\"body\":\"That's cool.\"}";
+        http_request_t *request = http_request_new(HTTP_METHOD_POST, issues_list_url, headers, body);
         http_response_t *response = http_perform(request, NULL);
-        assert(response->status == HTTP_STATUS_CREATED);
-        printf("[ Response (Request) ]\n>>> method: %d\n>>> url: %s\n>>> headers:\n%s\n>>> body:\n%s\n\n",
-               response->request->method, response->request->url, response->request->headers, response->request->body
-        );
-        printf("[ Response ]\n>>> url: %s\n>>> status: %d\n>>> headers:\n%s\n>>> body:\n%s\n",
-               response->url, response->status, response->headers, response->body
-        );
+        if (response->status != HTTP_STATUS_CREATED) {
+            return 1;
+        }
 
+        /* parsing headers */
+        size_t response_headers_len = MAX_HEADERS;
+        struct phr_header response_headers_dict[MAX_HEADERS];
+        const char *response_headers = (response->headers + strcspn(response->headers, "\n") + 1);
+        phr_parse_headers(response_headers, strlen(response_headers), response_headers_dict, &response_headers_len, 0);
+        struct phr_header *current_header = NULL;
+        char current_header_name[MAX_HEADER_LEN] = {0};
+        char current_header_value[MAX_HEADER_LEN] = {0};
+        for (size_t i = 0; i < response_headers_len; i++) {
+            current_header = &response_headers_dict[i];
+            snprintf(current_header_name, MAX_HEADER_LEN, "%.*s", (int) current_header->name_len, current_header->name);
+            if (strcasecmp("date", current_header_name) == 0) {
+                snprintf(current_header_value, MAX_HEADER_LEN, "%.*s", (int) current_header->value_len, current_header->value);
+                created_at = sdsnew(current_header_value);
+                break;
+            }
+        }
+
+        /* parsing body */
+        JSON_Value *root = json_parse_string(response->body);
+        JSON_Object *object = json_value_get_object(root);
+        issue_details_url = sdsnew(json_object_get_string(object, "url"));
+
+        /* freeing memory */
+        json_value_free(root);
         http_response_delete(response);
         http_request_delete(request);
-        sdsfree(body);
-    }
 
-    url = sdscat(url, "/39");
-
-    /**
-     * Get an issue
-     */
-    {
-        http_request_t *request = http_request_new(HTTP_METHOD_GET, url, headers, NULL);
-        printf("[ Request ]\n>>> method: %d\n>>> url: %s\n>>> headers:\n%s\n>>> body:\n%s\n\n\n",
-               request->method, request->url, request->headers, request->body
-        );
-
-        http_response_t *response = http_perform(request, NULL);
-        assert(response->status == HTTP_STATUS_OK);
-        printf("[ Response (Request) ]\n>>> method: %d\n>>> url: %s\n>>> headers:\n%s\n>>> body:\n%s\n\n",
-               response->request->method, response->request->url, response->request->headers, response->request->body
-        );
-        printf("[ Response ]\n>>> url: %s\n>>> status: %d\n>>> headers:\n%s\n>>> body:\n%s\n",
-               response->url, response->status, response->headers, response->body
-        );
-
-        http_response_delete(response);
-        http_request_delete(request);
+        puts("done");
     }
 
     /**
-     * Close an issue
+     * Update the issue
      */
     {
-        sds body = sdsnew("{\"state\":\"closed\"}");
+        printf("Updating the issue... ");
 
-        http_request_t *request = http_request_new(HTTP_METHOD_PATCH, url, headers, body);
-        printf("[ Request ]\n>>> method: %d\n>>> url: %s\n>>> headers:\n%s\n>>> body:\n%s\n\n\n",
-               request->method, request->url, request->headers, request->body
+        sds body = sdscatfmt(
+                sdsempty(),
+                "{\"title\":\"Test issue opened %s.\",\"body\":\"Going to close this issue.\"}",
+                created_at
         );
-
+        http_request_t *request = http_request_new(HTTP_METHOD_PATCH, issue_details_url, headers, body);
         http_response_t *response = http_perform(request, NULL);
-        assert(response->status == HTTP_STATUS_OK);
-        printf("[ Response (Request) ]\n>>> method: %d\n>>> url: %s\n>>> headers:\n%s\n>>> body:\n%s\n\n",
-               response->request->method, response->request->url, response->request->headers, response->request->body
-        );
-        printf("[ Response ]\n>>> url: %s\n>>> status: %d\n>>> headers:\n%s\n>>> body:\n%s\n",
-               response->url, response->status, response->headers, response->body
-        );
-
+        if (response->status != HTTP_STATUS_OK) {
+            return 2;
+        }
         http_response_delete(response);
         http_request_delete(request);
         sdsfree(body);
+
+        puts("done");
+    }
+
+    /**
+     * Retrieve the issue
+     */
+    {
+        printf("Retrieving the issue... ");
+
+        http_request_t *request = http_request_new(HTTP_METHOD_GET, issue_details_url, headers, NULL);
+        http_response_t *response = http_perform(request, NULL);
+        if (response->status != HTTP_STATUS_OK) {
+            return 3;
+        }
+        http_response_delete(response);
+        http_request_delete(request);
+
+        puts("done");
+    }
+
+    /**
+     * Close the issue
+     */
+    {
+        printf("Closing the issue... ");
+
+        const char *body = "{\"state\":\"closed\"}";
+        http_request_t *request = http_request_new(HTTP_METHOD_PATCH, issue_details_url, headers, body);
+        http_response_t *response = http_perform(request, NULL);
+        if (response->status != HTTP_STATUS_OK) {
+            return 4;
+        }
+        http_response_delete(response);
+        http_request_delete(request);
+
+        puts("done");
     }
 
     sdsfree(headers);
-    sdsfree(url);
+    sdsfree(issues_list_url);
+    sdsfree(issue_details_url);
+    sdsfree(created_at);
     return 0;
 }
