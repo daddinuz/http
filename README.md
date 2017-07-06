@@ -1,4 +1,4 @@
 # http
 
-Tiny C99 library for HTTP requests.  
+HTTP requests made easier.  
 Depends on libcurl.

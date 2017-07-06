@@ -9,7 +9,7 @@
 #ifndef __HTTP_H__
 #define __HTTP_H__
 
-#define HTTP_VERSION "0.2.5"
+#define HTTP_VERSION "0.2.6"
 
 #include <stdbool.h>
 #include "http_status.h"

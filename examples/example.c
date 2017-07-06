@@ -15,7 +15,7 @@
 #include "picohttpparser/picohttpparser.h"
 
 #define MAX_HEADERS 64
-#define MAX_HEADER_LEN 32
+#define DATE_HEADER_LEN 5
 
 /*
  *
@@ -24,7 +24,7 @@ int main() {
     sds created_at = NULL;
     sds issue_details_url = NULL;
     sds issues_list_url = sdsnew("https://api.github.com/repos/daddinuz/http/issues");
-    sds headers = sdscatprintf(
+    sds headers = sdscatfmt(
             sdsempty(),
             "Authorization: token %s\n"
                     "Accept: application/vnd.github.VERSION.raw+json\n"
@@ -48,19 +48,19 @@ int main() {
         }
 
         /* parsing headers */
+        char header_name[DATE_HEADER_LEN] = {0};
         size_t response_headers_len = MAX_HEADERS;
         struct phr_header response_headers_dict[MAX_HEADERS];
-        const char *response_headers = (response->headers + strcspn(response->headers, "\n") + 1);
-        phr_parse_headers(response_headers, strlen(response_headers), response_headers_dict, &response_headers_len, 0);
+        const size_t response_headers_start = strcspn(response->headers, "\n") + 1;
+        const size_t response_headers_length = response->headers_length - response_headers_start;
+        const char *response_headers = (response->headers + response_headers_start);
+        phr_parse_headers(response_headers, response_headers_length, response_headers_dict, &response_headers_len, 0);
         struct phr_header *current_header = NULL;
-        char current_header_name[MAX_HEADER_LEN] = {0};
-        char current_header_value[MAX_HEADER_LEN] = {0};
         for (size_t i = 0; i < response_headers_len; i++) {
             current_header = &response_headers_dict[i];
-            snprintf(current_header_name, MAX_HEADER_LEN, "%.*s", (int) current_header->name_len, current_header->name);
-            if (strcasecmp("date", current_header_name) == 0) {
-                snprintf(current_header_value, MAX_HEADER_LEN, "%.*s", (int) current_header->value_len, current_header->value);
-                created_at = sdsnew(current_header_value);
+            snprintf(header_name, DATE_HEADER_LEN, "%.*s", (int) current_header->name_len, current_header->name);
+            if (strcasecmp("date", header_name) == 0) {
+                created_at = sdscatprintf(sdsempty(), "%.*s", (int) current_header->value_len, current_header->value);
                 break;
             }
         }

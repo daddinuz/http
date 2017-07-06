@@ -19,11 +19,13 @@ extern "C" {
  * http_response_t opaque type.
  */
 struct http_response {
-    const int status;
     http_request_t *const request;
     const char *const url;
     const char *const headers;
     const char *const body;
+    const size_t headers_length;
+    const size_t body_length;
+    const int status;
 };
 
 typedef const struct http_response http_response_t;

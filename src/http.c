@@ -54,11 +54,13 @@ static const char *const __HTTP_METHOD_LINK = "LINK";
 static const char *const __HTTP_METHOD_UNLINK = "UNLINK";
 
 static http_response_t *__http_response_new(
-        int status,
         const http_request_t *request,
         const char *url,
         const char *headers,
-        const char *body
+        const char *body,
+        const size_t headers_length,
+        const size_t body_length,
+        int status
 );
 static const char *__http_method_to_string(http_method_t method);
 static void __die(const char *file, int line, const char *message);
@@ -130,15 +132,25 @@ http_response_t *http_perform(http_request_t *request, http_params_t *params) {
     curl_slist_free_all(headers_list);
     curl_easy_cleanup(handler);
 
-    return __http_response_new(status_code, request, effective_url, headers_buffer.memory, body_buffer.memory);
+    return __http_response_new(
+            request,
+            effective_url,
+            headers_buffer.memory,
+            body_buffer.memory,
+            headers_buffer.size,
+            body_buffer.size,
+            status_code
+    );
 }
 
 http_response_t *__http_response_new(
-        int status,
         const http_request_t *request,
         const char *url,
         const char *headers,
-        const char *body
+        const char *body,
+        const size_t headers_length,
+        const size_t body_length,
+        int status
 ) {
     struct http_response *self = malloc(sizeof(http_response_t));
     if (NULL == self) {
@@ -147,10 +159,12 @@ http_response_t *__http_response_new(
     }
     const http_response_t initializer = {
             .request=request,
-            .status=status,
             .url=url,
             .headers=headers,
-            .body=body
+            .body=body,
+            .headers_length=headers_length,
+            .body_length=body_length,
+            .status=status
     };
     memcpy(self, &initializer, sizeof(http_response_t));
     return self;
