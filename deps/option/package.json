@@ -1,0 +1,19 @@
+{
+  "name": "option",
+  "repo": "daddinuz/option",
+  "version": "0.22.0",
+  "license": "MIT",
+  "description": "Option type resembling Rust's Option.",
+  "keywords": [
+    "Error Handling",
+    "Option"
+  ],
+  "src": [
+    "sources/option.h",
+    "sources/option.c"
+  ],
+  "dependencies": {
+    "daddinuz/panic": "0.3.0"
+  },
+  "makefile": "sources/build.cmake"
+}

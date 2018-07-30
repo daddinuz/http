@@ -51,3 +51,6 @@ cmake-build-*/
 # IDEs and editors
 *.idea
 *.swp
+
+# log files
+*.log

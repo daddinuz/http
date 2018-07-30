@@ -1,0 +1,23 @@
+{
+  "name": "text",
+  "repo": "daddinuz/text",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "A string library with support for complex operations on textual data.",
+  "keywords": [
+  ],
+  "src": [
+    "sources/text.h",
+    "sources/text.c",
+    "sources/text_config.h"
+  ],
+  "dependencies": {
+    "daddinuz/panic": "0.3.0",
+    "daddinuz/alligator": "0.24.0"
+  },
+  "development": {
+    "daddinuz/traits": "3.2.0",
+    "daddinuz/traits-unit": "3.0.0"
+  },
+  "makefile": "sources/build.cmake"
+}

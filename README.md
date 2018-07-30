@@ -1,4 +1,3 @@
 # http
 
-HTTP requests made easier.  
-Depends on libcurl.
+HTTP requests made easier, depends on libcurl.
