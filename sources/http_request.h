@@ -226,12 +226,12 @@ HttpRequestBuilder_setHeaders(struct HttpRequestBuilder *self, Text *ref)
 __attribute__((__nonnull__(1)));
 
 /**
- * TODO docs
+ * Construct in place the headers for the request.
  * 
- * @param self 
- * @param format 
- * @param ... 
- * @return 
+ * @attention self must not be NULL.
+ * @attention format must not be NULL.
+ * 
+ * @return The replaced headers. 
  */
 extern Http_MaybeText
 HttpRequestBuilder_emplaceHeaders(struct HttpRequestBuilder *self, const char *format, ...)
@@ -253,12 +253,12 @@ HttpRequestBuilder_setBody(struct HttpRequestBuilder *self, Text *ref)
 __attribute__((__nonnull__(1)));
 
 /**
- * TODO docs
+ * Construct in place the body for the request.
  * 
- * @param self 
- * @param format 
- * @param ... 
- * @return 
+ * @attention self must not be NULL.
+ * @attention format must not be NULL.
+ * 
+ * @return The replaced body. 
  */
 extern Http_MaybeText
 HttpRequestBuilder_emplaceBody(struct HttpRequestBuilder *self, const char *format, ...)
