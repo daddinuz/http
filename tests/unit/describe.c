@@ -29,8 +29,12 @@
 #include <traits-unit/traits-unit.h>
 #include <unit/fixtures.h>
 #include <unit/features/http_fire_result.h>
+#include <unit/features/http_maybe_text.h>
 
 Describe("Http",
          Trait("Http_FireResult",
                Run(Http_FireResult_ok, RequestFixture),
-               Run(Http_FireResult_error)))
+               Run(Http_FireResult_error)),
+         Trait("Http_MaybeText",
+               Run(Http_MaybeText_new)),
+)

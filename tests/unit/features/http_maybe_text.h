@@ -28,50 +28,13 @@
 
 #pragma once
 
-#include <http.h>
-
-#if !(defined(__GNUC__) || defined(__clang__))
-#define __attribute__(...)
-#endif
+#include <traits-unit/traits-unit.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * Unwraps the text.
- * @attention Terminates execution if text is not present.
- */
-#define Http_MaybeText_unwrap(self) \
-    __Http_MaybeText_unwrap(__FILE__, __LINE__, (self))
-
-/**
- * Maybe type: eg Maybe(Text)
- */
-typedef struct __Http_MaybeText {
-    Text __text;
-} Http_MaybeText;
-
-/**
- * Constructs an instance of Http_MaybeText from text.
- */
-extern Http_MaybeText Http_MaybeText_new(Text text)
-__attribute__((__warn_unused_result__));
-
-/**
- * NOTE: Do NOT use this function directly, @see Http_MaybeText_unwrap.
- *
- * Unwraps the text.
- * @attention Terminates execution if text is not present.
- */
-extern Text __Http_MaybeText_unwrap(const char *file, int line, Http_MaybeText self)
-__attribute__((__warn_unused_result__, __nonnull__));
-
-/**
- * @return true if text is present (non-null) else false.
- */
-extern bool Http_MaybeText_isPresent(Http_MaybeText self)
-__attribute__((__warn_unused_result__, __nonnull__));
+Feature(Http_MaybeText_new);
 
 #ifdef __cplusplus
 }

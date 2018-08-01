@@ -26,53 +26,23 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#pragma once
-
 #include <http.h>
+#include <traits/traits.h>
+#include <unit/features/http_maybe_text.h>
 
-#if !(defined(__GNUC__) || defined(__clang__))
-#define __attribute__(...)
-#endif
+Feature(Http_MaybeText_new) {
+    {
+        Text text = NULL;
+        Http_MaybeText maybeText = Http_MaybeText_new(text);
+        const size_t counter = traits_unit_get_wrapped_signals_counter();
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+        assert_false(Http_MaybeText_isPresent(maybeText));
 
-/**
- * Unwraps the text.
- * @attention Terminates execution if text is not present.
- */
-#define Http_MaybeText_unwrap(self) \
-    __Http_MaybeText_unwrap(__FILE__, __LINE__, (self))
+        traits_unit_wraps(SIGABRT) {
+            text = Http_MaybeText_unwrap(maybeText);
+            (void) text;
+        }
 
-/**
- * Maybe type: eg Maybe(Text)
- */
-typedef struct __Http_MaybeText {
-    Text __text;
-} Http_MaybeText;
-
-/**
- * Constructs an instance of Http_MaybeText from text.
- */
-extern Http_MaybeText Http_MaybeText_new(Text text)
-__attribute__((__warn_unused_result__));
-
-/**
- * NOTE: Do NOT use this function directly, @see Http_MaybeText_unwrap.
- *
- * Unwraps the text.
- * @attention Terminates execution if text is not present.
- */
-extern Text __Http_MaybeText_unwrap(const char *file, int line, Http_MaybeText self)
-__attribute__((__warn_unused_result__, __nonnull__));
-
-/**
- * @return true if text is present (non-null) else false.
- */
-extern bool Http_MaybeText_isPresent(Http_MaybeText self)
-__attribute__((__warn_unused_result__, __nonnull__));
-
-#ifdef __cplusplus
+        assert_equal(counter + 1, traits_unit_get_wrapped_signals_counter());
+    }
 }
-#endif
