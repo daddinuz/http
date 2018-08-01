@@ -66,7 +66,7 @@ Feature(Http_FireResult_ok) {
 }
 
 Feature(Http_FireResult_error) {
-    Error error = NULL;
+    volatile Error error = NULL;
 
     {
         const size_t counter = traits_unit_get_wrapped_signals_counter();

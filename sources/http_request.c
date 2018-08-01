@@ -28,7 +28,6 @@
 
 #include <http.h>
 #include <assert.h>
-#include <stdlib.h>
 #include <alligator/alligator.h>
 
 struct HttpRequest {
@@ -54,12 +53,12 @@ Atom HttpRequest_getUrl(const struct HttpRequest *self) {
 
 TextView HttpRequest_getHeaders(const struct HttpRequest *self) {
     assert(self);
-    return NULL == self->headers ? Http_getEmptyHeaders() : self->headers;
+    return NULL == self->headers ? Http_getEmptyString() : self->headers;
 }
 
 TextView HttpRequest_getBody(const struct HttpRequest *self) {
     assert(self);
-    return NULL == self->body ? Http_getEmptyBody() : self->body;
+    return NULL == self->body ? Http_getEmptyString() : self->body;
 }
 
 size_t HttpRequest_getTimeout(const struct HttpRequest *self) {

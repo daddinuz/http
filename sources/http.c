@@ -32,16 +32,11 @@
 #include <curl/curl.h>
 #include <panic/panic.h>
 
-static Text body = NULL;
-static Text headers = NULL;
-static bool initialized = false;  // TODO: make thread local
+static Text emptyString = NULL;
+static bool initialized = false;
 
-static void cleanupBody(void) {
-    Text_delete(body);
-}
-
-static void cleanupHeaders(void) {
-    Text_delete(headers);
+static void cleanupEmptyString(void) {
+    Text_delete(emptyString);
 }
 
 static Text readFile(FILE *file) {
@@ -85,25 +80,18 @@ void Http_terminate(void) {
     }
 }
 
-TextView Http_getEmptyBody(void) {
-    if (!body) {
-        body = Text_new();
-        atexit(cleanupBody);
+TextView Http_getEmptyString(void) {
+    if (NULL == emptyString) {
+        emptyString = Text_new();
+        atexit(cleanupEmptyString);
     }
-    return body;
-}
-
-TextView Http_getEmptyHeaders(void) {
-    if (!headers) {
-        headers = Text_new();
-        atexit(cleanupHeaders);
-    }
-    return headers;
+    return emptyString;
 }
 
 Http_FireResult HttpRequest_fire(const struct HttpRequest **ref) {
     assert(ref);
     assert(*ref);
+    assert(initialized);
     Error error;
     CURL *curlHandler = NULL;
     FILE *responseHeadersFile, *responseBodyFile = NULL;

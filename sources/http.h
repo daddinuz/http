@@ -51,13 +51,25 @@
 extern "C" {
 #endif
 
+/**
+ * Initializes http module.
+ *
+ * @attention must be called at least once in every program that uses the http module, before firing any request.
+ */
 extern void Http_initialize(void);
+
+/**
+ * Terminates the http module freeing memory.
+ * 
+ * @attention must be called at least once in every program that uses the http module; After calling this functions 
+ * it's not allowed to fire a request without calling Http_initialize() before.
+ */
 extern void Http_terminate(void);
 
-extern TextView Http_getEmptyBody(void)
-__attribute__((__warn_unused_result__));
-
-extern TextView Http_getEmptyHeaders(void)
+/**
+ * Gets the singleton instance of a readonly  empty string.
+ */
+extern TextView Http_getEmptyString(void)
 __attribute__((__warn_unused_result__));
 
 #ifdef __cplusplus

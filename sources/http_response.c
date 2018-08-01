@@ -29,7 +29,6 @@
 #include <http.h>
 #include <assert.h>
 #include <alligator/alligator.h>
-#include <stdio.h>
 
 struct HttpResponse {
     const struct HttpRequest *request;
@@ -51,12 +50,12 @@ Atom HttpResponse_getUrl(const struct HttpResponse *self) {
 
 TextView HttpResponse_getHeaders(const struct HttpResponse *self) {
     assert(self);
-    return NULL == self->headers ? Http_getEmptyHeaders() : self->headers;
+    return NULL == self->headers ? Http_getEmptyString() : self->headers;
 }
 
 TextView HttpResponse_getBody(const struct HttpResponse *self) {
     assert(self);
-    return NULL == self->body ? Http_getEmptyBody() : self->body;
+    return NULL == self->body ? Http_getEmptyString() : self->body;
 }
 
 enum HttpStatus HttpResponse_getStatus(const struct HttpResponse *self) {
