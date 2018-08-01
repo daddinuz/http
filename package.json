@@ -1,23 +1,41 @@
 {
   "name": "http",
-  "version": "0.2.6",
   "repo": "daddinuz/http",
+  "version": "0.3.0",
+  "license": "MIT",
   "description": "HTTP requests made easier.",
   "keywords": [
     "http",
     "https",
     "requests"
   ],
-  "license": "MIT",
-  "makefile": "http.cmake",
   "src": [
-    "include/http/http.h",
-    "include/http/http_method.h",
-    "include/http/http_request.h",
-    "include/http/http_response.h",
-    "include/http/http_status.h",
-    "src/http.c",
-    "src/http_request.c",
-    "src/http_response.c"
-  ]
+    "sources/http.c",
+    "sources/http.h",
+    "sources/http_error.c",
+    "sources/http_error.h",
+    "sources/http_fire_result.c",
+    "sources/http_fire_result.h",
+    "sources/http_maybe_text.c",
+    "sources/http_maybe_text.h",
+    "sources/http_method.c",
+    "sources/http_method.h",
+    "sources/http_request.c",
+    "sources/http_request.h",
+    "sources/http_response.c",
+    "sources/http_response.h",
+    "sources/http_status.c",
+    "sources/http_status.h"
+  ],
+  "dependencies": {
+    "daddinuz/atom": "0.1.0",
+    "daddinuz/text": "0.1.0",
+    "daddinuz/error": "0.2.0",
+    "daddinuz/panic": "0.3.0"
+  },
+  "development": {
+    "daddinuz/traits": "3.2.0",
+    "daddinuz/traits-unit": "3.0.0"
+  },
+  "makefile": "sources/build.cmake"
 }
