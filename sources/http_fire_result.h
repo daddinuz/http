@@ -38,12 +38,23 @@
 extern "C" {
 #endif
 
+/**
+ * Unwraps the http response.
+ * @attention Terminates execution if the result is not wrapping an http response.
+ */
 #define Http_FireResult_unwrap(self) \
     __Http_FireResult_unwrap(__FILE__, __LINE__, (self))
 
+/**
+ * Unwraps the error.
+ * @attention Terminates execution if the result is wrapping an http response.
+ */
 #define Http_FireResult_unwrapError(self) \
     __Http_FireResult_unwrapError(__FILE__, __LINE__, (self))
 
+/**
+ * Either type: Either(Error, struct HttpResponse *)
+ */
 typedef struct __Http_FireResult {
     union {
         const struct HttpResponse *__response;
@@ -52,21 +63,49 @@ typedef struct __Http_FireResult {
     const bool __isOk;
 } Http_FireResult;
 
+/**
+ * Constructs a fire result wrapping the response from the server.
+ *
+ * @attention response must not be NULL.
+ */
 extern Http_FireResult Http_FireResult_ok(const struct HttpResponse *response)
 __attribute__((__warn_unused_result__, __nonnull__));
 
+/**
+ * Constructs a fire result wrapping the error.
+ *
+ * @attention error must not be NULL.
+ */
 extern Http_FireResult Http_FireResult_error(Error error)
 __attribute__((__warn_unused_result__, __nonnull__));
 
+/**
+ * NOTE: Do NOT use this function directly, @see Http_FireResult_unwrap.
+ *
+ * Unwraps the http response.
+ * @attention Terminates execution if the result is not Ok.
+ */
 extern const struct HttpResponse *__Http_FireResult_unwrap(const char *file, int line, Http_FireResult self)
 __attribute__((__warn_unused_result__, __nonnull__));
 
+/**
+ * NOTE: Do NOT use this function directly, @see Http_FireResult_unwrapError.
+ *
+ * Unwraps the error.
+ * @attention Terminates execution if the result is Ok.
+ */
 extern Error __Http_FireResult_unwrapError(const char *file, int line, Http_FireResult self)
 __attribute__((__warn_unused_result__, __nonnull__));
 
+/**
+ * @return true if the result wraps an http response else false
+ */
 extern bool Http_FireResult_isOk(Http_FireResult self)
 __attribute__((__warn_unused_result__));
 
+/**
+ * @return true if the result wraps an error else false
+ */
 extern bool Http_FireResult_isError(Http_FireResult self)
 __attribute__((__warn_unused_result__));
 

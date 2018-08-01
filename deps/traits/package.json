@@ -1,0 +1,15 @@
+{
+  "name": "traits",
+  "repo": "daddinuz/traits",
+  "version": "3.2.0",
+  "license": "MIT",
+  "description": "Assertions library written in C99.",
+  "keywords": [
+    "assert",
+    "assertions",
+    "assertions-library"
+  ],
+  "src": [
+    "sources/traits.h"
+  ]
+}

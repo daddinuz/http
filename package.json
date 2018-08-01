@@ -33,5 +33,9 @@
     "daddinuz/error": "0.2.0",
     "daddinuz/panic": "0.3.0"
   },
+  "development": {
+    "daddinuz/traits": "3.2.0",
+    "daddinuz/traits-unit": "3.0.0"
+  },
   "makefile": "sources/build.cmake"
 }

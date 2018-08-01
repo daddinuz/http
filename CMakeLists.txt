@@ -13,6 +13,7 @@ include(deps/error/build.cmake)
 include(deps/panic/build.cmake)
 include(deps/option/build.cmake)
 include(deps/alligator/build.cmake)
+include(deps/traits-unit/build.cmake)
 
 # archive
 include_directories(sources)
@@ -20,3 +21,7 @@ include(sources/build.cmake)
 
 # examples
 include(examples/build.cmake)
+
+# tests
+include_directories(tests)
+include(tests/unit/build.cmake)
