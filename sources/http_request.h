@@ -41,123 +41,95 @@ extern "C" {
 struct HttpRequest;
 
 /**
- * Returns the http method associated to the specified request.
+ * Returns the http method associated to this request.
  *
  * @attention self must not be NULL.
- *
- * @param self The HttpRequest instance.
- * @return The http method of the specified request.
  */
 extern enum HttpMethod
 HttpRequest_getMethod(const struct HttpRequest *self)
 __attribute__((__warn_unused_result__, __nonnull__));
 
 /**
- * Returns the url associated to the specified request.
+ * Returns the url associated to this request.
  *
  * @attention self must not be NULL.
- *
- * @param self The HttpRequest instance.
- * @return The url associated to the specified request.
  */
 extern Atom
 HttpRequest_getUrl(const struct HttpRequest *self)
 __attribute__((__warn_unused_result__, __nonnull__));
 
 /**
- * Returns the headers associated to the request.
+ * Returns the headers associated to this request.
+ * Note: The current request is the owner of these headers, therefore they must be considered read-only.
  *
  * @attention self must not be NULL.
- * @attention The current request is the owner of these headers, therefore they must be considered read-only.
- *
- * @param self The HttpRequest instance.
- * @return The headers associated to the specified request.
  */
 extern TextView
 HttpRequest_getHeaders(const struct HttpRequest *self)
 __attribute__((__warn_unused_result__, __nonnull__));
 
 /**
- * Returns the body associated to the request.
+ * Returns the body associated to this request.
+ * Note: The current request is the owner of the body, therefore it must be considered read-only.
  *
  * @attention self must not be NULL.
- * @attention The current request is the owner of the body, therefore it must be considered read-only.
- *
- * @param self The HttpRequest instance.
- * @return The body associated to the specified request.
  */
 extern TextView
 HttpRequest_getBody(const struct HttpRequest *self)
 __attribute__((__warn_unused_result__, __nonnull__));
 
 /**
- * Returns the timeout associated to the specified request.
+ * Returns the timeout for this request.
  *
  * @attention self must not be NULL.
- *
- * @param self The HttpRequest instance.
- * @return The timeout associated to the specified request.
  */
 extern size_t
 HttpRequest_getTimeout(const struct HttpRequest *self)
 __attribute__((__warn_unused_result__, __nonnull__));
 
 /**
- * Returns true if follow location is enabled for the specified request else false.
+ * Returns true if follow location is enabled for this request else false.
  *
  * @attention self must not be NULL.
- *
- * @param self The HttpRequest instance
- * @return true if follow location is enabled for the specified request else false.
  */
 extern bool
 HttpRequest_getFollowLocation(const struct HttpRequest *self)
 __attribute__((__warn_unused_result__, __nonnull__));
 
 /**
- * Returns true if peer verification is enabled for the specified request else false.
+ * Returns true if peer verification is enabled for this request else false.
  *
  * @attention self must not be NULL.
- *
- * @param self The HttpRequest instance.
- * @return true if peer verification is enabled for the specified request else false.
  */
 extern bool
 HttpRequest_getPeerVerification(const struct HttpRequest *self)
 __attribute__((__warn_unused_result__, __nonnull__));
 
 /**
- * Returns true if host verification is enabled for the specified request else false.
+ * Returns true if host verification is enabled for this request else false.
  *
  * @attention self must not be NULL.
- *
- * @param self The HttpRequest instance.
- * @return true if host verification is enabled for the specified request else false.
  */
 extern bool
 HttpRequest_getHostVerification(const struct HttpRequest *self)
 __attribute__((__warn_unused_result__, __nonnull__));
 
 /**
- * Performs the http request returning the server response.
+ * TODO check
+ *
+ * Sends the http request to the server waiting for response.
  *
  * @attention self must not be NULL.
- * @attention On success this function moves the ownership of the request to the resulting response invalidating every references.
- *
- * @param ref The reference to the request instance.
- * @return
- * - Ok => Wraps the http response, *ref has been invalidated.
- * - NetworkingError => There were something wrong with the connection, *ref has not been invalidated.
+ * @attention on success this function moves the ownership of the request to the resulting response
+ * invalidating any previous reference to the request, on error the reference to the request is left untouched.
  */
 extern Http_FireResult
 HttpRequest_fire(const struct HttpRequest **ref)
 __attribute__((__warn_unused_result__, __nonnull__));
 
 /**
- * Deletes this instance of HttpRequest.
- * If self is NULL no action will be performed.
- *
- * @param self The instance to be deleted.
+ * Deletes this request freeing memory.
+ * Note: If self is NULL no action will be performed.
  */
 extern void
 HttpRequest_delete(const struct HttpRequest *self);
@@ -172,169 +144,146 @@ struct HttpRequestBuilder;
  * Creates a new request builder.
  *
  * @attention url must not be NULL.
- * @attention the lifetime of url must be greater of the builder instance or the built request.
- * 
- * @param method The http method for the request.
- * @param url The url for the request.
- * @return A new HttpRequestBuilder instance.
+ * @attention the lifetime of url must be greater of the builder instance or the built request (if any).
  */
 extern struct HttpRequestBuilder *
 HttpRequestBuilder_new(enum HttpMethod method, Atom url)
 __attribute__((__warn_unused_result__, __nonnull__));
 
 /**
- * Sets the method for the request.
+ * Sets the method for the request stored into this builder.
  *
  * @attention self must not be NULL.
  *
- * @param self The request builder instance.
- * @param method The http method for the request.
- * @return The replaced method.
+ * @return The previous http method stored into this builder.
  */
 extern enum HttpMethod
 HttpRequestBuilder_setMethod(struct HttpRequestBuilder *self, enum HttpMethod method)
 __attribute__((__nonnull__));
 
 /**
- * Sets the url for the request.
+ * Sets the url for the request stored into this builder.
  * 
  * @attention self must not be NULL.
  * @attention url must not be NULL.
- * @attention the lifetime of url must be greater of the builder instance or the built request if any.
+ * @attention the lifetime of url must be greater of the builder instance or the built request (if any).
  *
- * @param self The request builder instance.
- * @param url Self explaining.
- * @return The replaced url.
+ * @return The previous url stored into this builder.
  */
 extern Atom
 HttpRequestBuilder_setUrl(struct HttpRequestBuilder *self, Atom url)
 __attribute__((__nonnull__));
 
 /**
- * Sets the headers for the request.
+ * Sets the headers for the request stored into this builder.
  *
  * @attention self must not be NULL.
- * @attention the user is responsible to free the replaced headers if any.
- * @attention moves the ownership of the headers to the builder instance invalidating external references.
+ * @attention the user is responsible to free the replaced headers (if any).
+ * @attention this function moves the ownership of the headers to this builder invalidating every previous reference.
  *
- * @param self The request builder instance.
- * @param ref The reference to the headers instance.
- * @return The replaced headers.
+ * @return The previous headers stored into this builder.
  */
 extern Http_MaybeText
 HttpRequestBuilder_setHeaders(struct HttpRequestBuilder *self, Text *ref)
 __attribute__((__nonnull__(1)));
 
 /**
- * Construct in place the headers for the request.
+ * Construct in place and replace the headers for the request stored into this builder.
  * 
  * @attention self must not be NULL.
  * @attention format must not be NULL.
+ * @attention the user is responsible to free the replaced headers (if any).
  * 
- * @return The replaced headers. 
+ * @return The previous headers stored into this builder.
  */
 extern Http_MaybeText
 HttpRequestBuilder_emplaceHeaders(struct HttpRequestBuilder *self, const char *format, ...)
 __attribute__((__nonnull__(1, 2), __format__(printf, 2, 3)));
 
 /**
- * Sets the body for the request.
+ * Sets the body for the request stored into this builder.
  *
  * @attention self must not be NULL.
- * @attention the user is responsible to free the replaced body if any.
- * @attention moves the ownership of the body to the builder instance invalidating external references.
+ * @attention the user is responsible to free the replaced body (if any).
+ * @attention this function moves the ownership of the body to this builder invalidating every previous reference.
  *
- * @param self The request builder instance.
- * @param ref The reference to the body instance.
- * @return The replaced body.
+ * @return The previous body stored into this builder.
  */
 extern Http_MaybeText
 HttpRequestBuilder_setBody(struct HttpRequestBuilder *self, Text *ref)
 __attribute__((__nonnull__(1)));
 
 /**
- * Construct in place the body for the request.
+ * Construct in place and replace the body for the request stored into this builder.
  * 
  * @attention self must not be NULL.
  * @attention format must not be NULL.
+ * @attention the user is responsible to free the replaced body (if any).
  * 
- * @return The replaced body. 
+ * @return The previous body stored into this builder.
  */
 extern Http_MaybeText
 HttpRequestBuilder_emplaceBody(struct HttpRequestBuilder *self, const char *format, ...)
 __attribute__((__nonnull__(1, 2), __format__(printf, 2, 3)));
 
 /**
- * Sets the timeout for the request.
+ * Sets the timeout for the request stored into this builder.
  *
  * @attention self must not be NULL.
  *
- * @param self The request builder instance.
- * @param timeout The specified timeout.
- * @return The replaced value for timeout.
+ * @return The previous timeout stored into this builder.
  */
 extern size_t
 HttpRequestBuilder_setTimeout(struct HttpRequestBuilder *self, size_t timeout)
 __attribute__((__nonnull__));
 
 /**
- * Enables or disables follow location for the request.
+ * Enables or disables follow location for the request stored into this builder.
  *
  * @attention self must not be NULL.
  *
- * @param self The request builder instance.
- * @param enable Self explaining.
- * @return The previous value for follow location.
+ * @return The previous value stored into this builder.
  */
 extern bool
 HttpRequestBuilder_setFollowLocation(struct HttpRequestBuilder *self, bool enable)
 __attribute__((__nonnull__));
 
 /**
- * Enables or disables peer verification for the request.
+ * Enables or disables peer verification for the request stored into this builder.
  *
  * @attention self must not be NULL.
  *
- * @param self The request builder instance.
- * @param enable Self explaining.
- * @return The previous value for peer verification.
+ * @return The previous value stored into this builder.
  */
 extern bool
 HttpRequestBuilder_setPeerVerification(struct HttpRequestBuilder *self, bool enable)
 __attribute__((__nonnull__));
 
 /**
- * Enables or disables host verification for the request.
+ * Enables or disables host verification for the request stored into this builder.
  *
  * @attention self must not be NULL.
  *
- * @param self The request builder instance.
- * @param enable Self explaining.
- * @return The previous value for host verification.
+ * @return The previous value stored into this builder.
  */
 extern bool
 HttpRequestBuilder_setHostVerification(struct HttpRequestBuilder *self, bool enable)
 __attribute__((__nonnull__));
 
 /**
- * Constructs the http request.
+ * Constructs the http request and deletes this builder freeing memory.
  *
  * @attention ref must not be NULL.
  * @attention *ref must not be NULL.
- * @attention on success takes the ownership of the request builder invalidating its external references.
- *
- * @param ref The reference to the request builder instance.
- * @return The http request instance.
+ * @attention this functions takes the ownership of this builder invalidating every previous reference.
  */
 extern const struct HttpRequest *
 HttpRequestBuilder_build(struct HttpRequestBuilder **ref)
 __attribute__((__warn_unused_result__, __nonnull__));
 
 /**
- * Deletes this instance of HttpRequestBuilder.
+ * Deletes this builder freeing memory.
  * If self is NULL no action will be performed.
- *
- * @param self The instance to be deleted.
  */
 extern void
 HttpRequestBuilder_delete(struct HttpRequestBuilder *self);
