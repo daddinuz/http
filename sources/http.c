@@ -94,10 +94,9 @@ Http_FireResult HttpRequest_fire(const struct HttpRequest **ref) {
     assert(initialized);
     Error error;
     CURL *curlHandler = NULL;
-    FILE *responseHeadersFile, *responseBodyFile = NULL;
     struct curl_slist *curlHeaders = NULL;
     const struct HttpRequest *request = *ref;
-    struct HttpResponseBuilder *responseBuilder = HttpResponseBuilder_new(ref);
+    FILE *responseHeadersFile, *responseBodyFile = NULL;
 
     curlHandler = curl_easy_init();
     if (NULL == curlHandler) {
@@ -175,34 +174,47 @@ Http_FireResult HttpRequest_fire(const struct HttpRequest **ref) {
             error = HttpError_UnableToSendData;
             break;
         default:
+            fprintf(stderr, "%s\n", curl_easy_strerror(e));
             error = HttpError_NetworkingError;
     }
 
-    // set response effective url
-    if (HttpRequest_getFollowLocation(request)) {
-        char *tmp = NULL;
-        curl_easy_getinfo(curlHandler, CURLINFO_EFFECTIVE_URL, &tmp);
-        HttpResponseBuilder_setUrl(responseBuilder, Atom_fromLiteral(tmp));
+    if (Ok == error) {
+        struct HttpResponseBuilder *responseBuilder = HttpResponseBuilder_new(ref);
+
+        // set response effective url
+        if (HttpRequest_getFollowLocation(request)) {
+            char *tmp = NULL;
+            curl_easy_getinfo(curlHandler, CURLINFO_EFFECTIVE_URL, &tmp);
+            HttpResponseBuilder_setUrl(responseBuilder, Atom_fromLiteral(tmp));
+        }
+
+        // set response status
+        long responseStatus;
+        curl_easy_getinfo(curlHandler, CURLINFO_RESPONSE_CODE, &responseStatus);
+        HttpResponseBuilder_setStatus(responseBuilder, (enum HttpStatus) responseStatus);
+
+        // set response headers
+        Text responseHeaders = readFile(responseHeadersFile);
+        HttpResponseBuilder_setHeaders(responseBuilder, &responseHeaders);
+
+        // set response body
+        Text responseBody = readFile(responseBodyFile);
+        HttpResponseBuilder_setBody(responseBuilder, &responseBody);
+
+        // perform cleanups
+        curl_slist_free_all(curlHeaders);
+        curl_easy_cleanup(curlHandler);
+        fclose(responseHeadersFile);
+        fclose(responseBodyFile);
+
+        return Http_FireResult_ok(HttpResponseBuilder_build(&responseBuilder));
+    } else {
+        // perform cleanups
+        curl_slist_free_all(curlHeaders);
+        curl_easy_cleanup(curlHandler);
+        fclose(responseHeadersFile);
+        fclose(responseBodyFile);
+
+        return Http_FireResult_error(error);
     }
-
-    // set response status
-    long responseStatus;
-    curl_easy_getinfo(curlHandler, CURLINFO_RESPONSE_CODE, &responseStatus);
-    HttpResponseBuilder_setStatus(responseBuilder, (enum HttpStatus) responseStatus);
-
-    // set response headers
-    Text responseHeaders = readFile(responseHeadersFile);
-    HttpResponseBuilder_setHeaders(responseBuilder, &responseHeaders);
-
-    // set response body
-    Text responseBody = readFile(responseBodyFile);
-    HttpResponseBuilder_setBody(responseBuilder, &responseBody);
-
-    // perform cleanups
-    curl_slist_free_all(curlHeaders);
-    curl_easy_cleanup(curlHandler);
-    fclose(responseHeadersFile);
-    fclose(responseBodyFile);
-
-    return Ok == error ? Http_FireResult_ok(HttpResponseBuilder_build(&responseBuilder)) : Http_FireResult_error(error);
 }

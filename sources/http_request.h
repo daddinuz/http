@@ -115,8 +115,6 @@ HttpRequest_getHostVerification(const struct HttpRequest *self)
 __attribute__((__warn_unused_result__, __nonnull__));
 
 /**
- * TODO check
- *
  * Sends the http request to the server waiting for response.
  *
  * @attention self must not be NULL.
